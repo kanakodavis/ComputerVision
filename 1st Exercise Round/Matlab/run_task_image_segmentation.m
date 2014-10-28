@@ -7,7 +7,7 @@ function run_task_image_segmentation()
 %   * Robin Melan
 
 %constant array with names of the images
-imageNames = {'simple.png'; 'future.jpg'; 'mm.jpg'};
+imageNames = {'simple.png', 'future.jpg', 'mm.jpg'};
 for imageName = imageNames
 %% Load images
 
