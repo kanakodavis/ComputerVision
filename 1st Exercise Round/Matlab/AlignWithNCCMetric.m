@@ -21,7 +21,10 @@ BestMatchCircShift = [0 0];
 for i = -SearchSize:SearchSize
    for j = -SearchSize:SearchSize 
        I_2_Shifted = circshift(I_2,[i j]);
+       % metric that calculates how good the image is aligned
        MatchMetric = corr2(I_1,I_2_Shifted);
+       
+       % update best match if it is better
        if MatchMetric > BestMatchMetric
            BestMatchMetric = MatchMetric;
            BestMatchCircShift = [i j];

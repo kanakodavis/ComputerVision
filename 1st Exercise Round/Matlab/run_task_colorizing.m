@@ -27,7 +27,6 @@ for imageName = imageNames
     
     %% combine and display them 
     
-    %TODO
     RGB(:,:,1) = R_aligned;
     RGB(:,:,2) = G_aligned;
     RGB(:,:,3) = B_aligned;
