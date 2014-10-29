@@ -9,9 +9,10 @@ function run_task_colorizing()
 %constant array with names of the images (each image has 3 images in the
 %containing folder which are not aligned (RGB)
 imageNames = {'00125v','00149v','00153v','00351v','00398v','01112v'};
+SearchSize = 15;
 
 %for debug: TODO delete
-%imageNames = {'00125v'}
+%imageNames = {'01112v'};
 
 for imageName = imageNames
     %% load images
@@ -20,9 +21,9 @@ for imageName = imageNames
     
     %% align images automatically
     
-    SearchSize = 15;
-    G_aligned = AlignWithNCCMetric(R,G,SearchSize);
-    B_aligned = AlignWithNCCMetric(R,B,SearchSize);
+    
+    G_aligned = FasterAlignWithNCCMetric(R,G,SearchSize);
+    B_aligned = FasterAlignWithNCCMetric(R,B,SearchSize);
     R_aligned = R;
     
     %% combine and display them 
@@ -32,6 +33,24 @@ for imageName = imageNames
     RGB(:,:,3) = B_aligned;
     figure;
     imshow(RGB);
+    
+    %% align images automatically
+    
+%     BestMatchCircShift = AlignWithNCCMetric(R,G,SearchSize);
+%    	G_aligned = circshift( G , BestMatchCircShift );
+%     
+%     BestMatchCircShift = AlignWithNCCMetric(R,B,SearchSize);
+%    	B_aligned = circshift( B , BestMatchCircShift );
+%     
+%     R_aligned = R;
+%     
+%     %% combine and display them 
+%     
+%     RGB(:,:,1) = R_aligned;
+%     RGB(:,:,2) = G_aligned;
+%     RGB(:,:,3) = B_aligned;
+%     figure;
+%     imshow(RGB);
     
 end
 

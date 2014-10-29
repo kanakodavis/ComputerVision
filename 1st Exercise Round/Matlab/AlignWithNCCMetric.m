@@ -1,4 +1,4 @@
-function I_aligned = AlignWithNCCMetric( I_1 , I_2 , SearchSize)
+function BestMatchCircShift = AlignWithNCCMetric( I_1 , I_2 , SearchSize)
 
 %Function that tries to align the second image to the first by using the
 %NCC Metric and the specified kernel size.
@@ -12,8 +12,6 @@ function I_aligned = AlignWithNCCMetric( I_1 , I_2 , SearchSize)
 %   I_aligned: The aligned I_2 image
 % Example:
 %   I_aligned = AlignWithNCCMetric( I_1 , I_2 , KernelSize)
-
-% Metric = corr2(KernelPartA,KernelPartB)
 
 BestMatchMetric = 0;
 BestMatchCircShift = [0 0];
@@ -31,6 +29,4 @@ for i = -SearchSize:SearchSize
        end
    end
 end
-
-I_aligned = circshift(I_2,BestMatchCircShift);
 end
