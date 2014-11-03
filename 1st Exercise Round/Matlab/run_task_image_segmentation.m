@@ -24,19 +24,27 @@ for imageName = tmp
     %% Implement the image segmentation
     % kmeans: http://www.mathworks.in/matlabcentral/fileexchange/8379-kmeans-image-segmentation/content/kmeans.m
     
-    % Creating color transformation from sRGB to L*a*b 
-    cform = makecform('srgb2lab');
-    % Applying above color transform to the sRGB image 
-    lab_he = applycform(I,cform); 
-    % Converting into double and taking only the 'a*' and 'b*' values, since they hold the color information 
-    ab = double(lab_he(:,:,2:3));
-    % obtaining rows and columns of transformed image 
-    nrows = size(ab,1);
-    ncols = size(ab,2);
-    % Reshaping image taking each value column wise to have my objects {x1,x2,...xN} 
-    ab = reshape(ab,nrows*ncols,2);
-    % No of clusters to be created with k iterations 
-    [cluster_idx cluster_center] = kmeans(ab,k,'distance','sqEuclidean','Replicates',5); 
+    nrows = size(I,1);
+    ncols = size(I,2);
+    
+    x = reshape(I,nrows*ncols,3);
+        
+    [cluster_idx cluster_center] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
+    %[cluster_idx cluster_center] = ClusteringByKMeans(x,k);
+    
+%     % Creating color transformation from sRGB to L*a*b 
+%     cform = makecform('srgb2lab');
+%     % Applying above color transform to the sRGB image 
+%     lab_he = applycform(I,cform); 
+%     % Converting into double and taking only the 'a*' and 'b*' values, since they hold the color information 
+%     ab = double(lab_he(:,:,2:3));
+%     % obtaining rows and columns of transformed image 
+%     nrows = size(ab,1);
+%     ncols = size(ab,2);
+%     % Reshaping image taking each value column wise to have my objects {x1,x2,...xN} 
+%     ab = reshape(ab,nrows*ncols,2);
+%     % No of clusters to be created with k iterations 
+%     [cluster_idx cluster_center] = kmeans(ab,k,'distance','sqEuclidean','Replicates',5); 
     
     %% Visualize the results
     %by coloring all pixels of a cluster with their mean color values. 
