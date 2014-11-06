@@ -11,13 +11,6 @@ function run_task_colorizing()
 imageNames = {'00125v','00149v','00153v','00351v','00398v','01112v','00882a'};
 SearchSize = 15;
 
-%for debug: TODO delete
-<<<<<<< HEAD
-%imageNames = {'00882a'};
-=======
-% tmp = {'00125v'};
->>>>>>> 8c9b4a243238840b8188c9925bb2f1a2e93f668f
-
 for imageName = imageNames
     %% load images
     
@@ -34,41 +27,27 @@ for imageName = imageNames
     elapsedTimeFast = num2str(toc);
     
     %% combine and display them 
-<<<<<<< HEAD
-    RGB = uint8(zeros([size(R_aligned) 3]));
-    RGB(:,:,1) = R_aligned;
-    RGB(:,:,2) = G_aligned;
-    RGB(:,:,3) = B_aligned;
-=======
-    
     RGB = cat(3, R_aligned, G_aligned, B_aligned);
-    %RGB(:,:,1) = R_aligned;
-    %RGB(:,:,2) = G_aligned;
-    %RGB(:,:,3) = B_aligned;
->>>>>>> 8c9b4a243238840b8188c9925bb2f1a2e93f668f
     figure;
     imshow(RGB);
     
-    %% align images automatically
+    % align images automatically
     % Take time
      tic
     
      BestMatchCircShift = AlignWithNCCMetric(R,G,SearchSize);
     	G_aligned = circshift( G , BestMatchCircShift );
-     
+    
      BestMatchCircShift = AlignWithNCCMetric(R,B,SearchSize);
-    	B_aligned = circshift( B , BestMatchCircShift );
-%     
+    	B_aligned = circshift( B , BestMatchCircShift );  
+        
      R_aligned = R;
      
      elapsedTimeSimple = num2str(toc);
      
-%     %% combine and display them 
-%    
+     % combine and display them 
      RGB2 = cat(3, R_aligned, G_aligned, B_aligned);
-     %RGB2(:,:,1) = R_aligned;
-     %RGB2(:,:,2) = G_aligned;
-     %RGB2(:,:,3) = B_aligned;
+   
 %     figure;
 %     imshow(RGB2);
      
