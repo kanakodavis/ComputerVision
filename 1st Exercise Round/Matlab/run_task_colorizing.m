@@ -8,11 +8,11 @@ function run_task_colorizing()
 %% initialization
 %constant array with names of the images (each image has 3 images in the
 %containing folder which are not aligned (RGB)
-imageNames = {'00125v','00149v','00153v','00351v','00398v','01112v'};
+imageNames = {'00125v','00149v','00153v','00351v','00398v','01112v','00882a'};
 SearchSize = 15;
 
 %for debug: TODO delete
-%imageNames = {'01112v'};
+%imageNames = {'00882a'};
 
 for imageName = imageNames
     %% load images
@@ -27,7 +27,7 @@ for imageName = imageNames
     R_aligned = R;
     
     %% combine and display them 
-    
+    RGB = uint8(zeros([size(R_aligned) 3]));
     RGB(:,:,1) = R_aligned;
     RGB(:,:,2) = G_aligned;
     RGB(:,:,3) = B_aligned;

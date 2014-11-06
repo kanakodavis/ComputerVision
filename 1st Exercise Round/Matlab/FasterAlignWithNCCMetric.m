@@ -13,25 +13,28 @@ function I_aligned = FasterAlignWithNCCMetric( I_1 , I_2 , SearchSize)
 % Example:
 %   I_aligned = AlignWithNCCMetric( I_1 , I_2 , KernelSize)
 
-% Number of pyramids is that high that the smallest pyramid aproximatly
-% 100px high
-NumPyramids = floor(max(size(I_2))/100);
+% determining the maximum level of a Pyramid so that the length of the
+% smallest pyramid is the Search Size * 2 + 1
+MaximumLevelByImageSize = ceil( log2( max( size( I_2 )/SearchSize*2 + 1 ) ) );
 
-% The SearchSize gets devided by the number of pyramids to ensure the
-% advantage of this method (its faster to align with a smaller search size
-% kernel)
-SearchSize = SearchSize / NumPyramids;
+% The search size gets divided by 2 for every pyramid we have. So we only
+% can have maximum logarithmus dualis of the search size image pyramids.
+MaximumLevelBySearchSize = ceil(log2(SearchSize));
+NumPyramids = min(MaximumLevelByImageSize,MaximumLevelBySearchSize);
+
+% The SearchSize gets set to 1 because of the above assumptions
+SearchSize = 1;
 
 % Filter the image with the laplacian of the gaussion before calculating
 % the metric to get better features
-h = fspecial('log');
-I_LOG_1 = imfilter(I_1,h);
-I_LOG_2 = imfilter(I_2,h);
+% h = fspecial('log');
+% I_FILTERED_1 = imfilter(I_1,h);
+% I_FILTERED_2 = imfilter(I_2,h);
 
 % Create the pyramids cell array
 c_Pyramids = cell(NumPyramids+1,2);
-c_Pyramids(1,1) = {I_LOG_1};
-c_Pyramids(1,2) = {I_LOG_2};
+c_Pyramids(1,1) = {I_1};
+c_Pyramids(1,2) = {I_2};
 
 % Create pyramids for the LOG of Image 1 and 2
 for i = 1:NumPyramids
