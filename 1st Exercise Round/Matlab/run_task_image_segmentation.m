@@ -13,13 +13,13 @@ tmp = {'future.jpg'};
 % declare the number of segments
 k = 3;
 
-for imageName = tmp
+for imageName = imageNames
     %% Load images
     fullPath = sprintf('Images/%s',cell2mat(imageName));
     I = im2double(imread(fullPath));
 
     % display the original image
-    figure, imshow(I), title('Original Image');
+    %figure, imshow(I), title('Original Image');
     
     %% Implement the image segmentation
     % kmeans: http://www.mathworks.in/matlabcentral/fileexchange/8379-kmeans-image-segmentation/content/kmeans.m
@@ -28,9 +28,19 @@ for imageName = tmp
     ncols = size(I,2);
     
     x = reshape(I,nrows*ncols,3);
-        
-    [cluster_idx cluster_center] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
-    %[cluster_idx cluster_center] = ClusteringByKMeans(x,k);
+     
+    % For Comparing reasons:
+    %[cluster_idx2 cluster_center2] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
+    %kmeans_compute_J(x, k, cluster_idx2, cluster_center2)
+    
+    %% TODO 
+    % 1) Apply the color transformation to L*a*b to have a better
+    % performance!
+    % 2) Implement My Kmeans for D = 5
+    
+    dimension = 3;
+    [cluster_idx cluster_center] = ClusteringByKMeans(x,k,dimension);
+    kmeans_compute_J(x, k, cluster_idx, cluster_center)
     
 %     % Creating color transformation from sRGB to L*a*b 
 %     cform = makecform('srgb2lab');
