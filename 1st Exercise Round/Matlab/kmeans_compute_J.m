@@ -11,6 +11,18 @@ function [J] = kmeans_compute_J(image, k, r, u)
 %                               sum over k (                            ) 
 %                                            r(n,k) * || xn - uk || ^ 2
 %
+% Input
+%   image : (X) holds values of the image
+%   k : selected k, representing the number of clusters
+%   r : holding the assigned cluster for every object in X
+%   u : holding the old values of the cluster centroids
+%   
+% Output
+%   J : value returning of the objective function (distortion measure)
+%
+% Author
+%   Robin Melan
+
 
 J = 0;
 

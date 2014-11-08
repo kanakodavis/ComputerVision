@@ -36,10 +36,8 @@ for imageName = imageNames
     %% TODO 
     % 1) Apply the color transformation to L*a*b to have a better
     % performance!
-    % 2) Implement My Kmeans for D = 5
     
-    dimension = 3;
-    [cluster_idx cluster_center] = ClusteringByKMeans(x,k,dimension);
+    [cluster_idx cluster_center] = ClusteringByKMeans(x,k);
     kmeans_compute_J(x, k, cluster_idx, cluster_center)
     
 %     % Creating color transformation from sRGB to L*a*b 
