@@ -1,5 +1,6 @@
 function [ scaleSpace ] = CreateScaleSpace( image, levels )
-%Function that does the Color Image Segmentation by the K-means Clustering
+%Function that creates the scale space for the scale invariant blob
+%detection
 % Authors
 %   * Matthias Gusenbauer
 % Input
