@@ -12,11 +12,13 @@ imageNames = {'butterfly.jpg','myimage.jpg'};
 for imageName = imageNames
 %% Load images
 
-%TODO
+image = imread(imageName);
 
 %% implement a LoG blob detector
 
-%TODO
+scaleSpace = CreateScaleSpace(image, 10);
+
+%TODO maximum thresholding
 
 end
 
