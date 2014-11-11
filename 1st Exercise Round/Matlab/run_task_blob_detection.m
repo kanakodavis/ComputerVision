@@ -10,30 +10,45 @@ function run_task_blob_detection()
 imageNames = {'Images/butterfly.jpg','Images/myimage.jpg'};
 for imageName = imageNames
 %% Load images
-
 image = imread(imageName{1});
 
-%% implement a LoG blob detector
+%%Init sigma for LOG convolution
+sigmas = InitSigma(10);
 
-scaleSpace = CreateScaleSpace(image, 10);
-%TODO MAYBE do abs(scalespace) before max detection
+%%Create scale space with LOG and sigmas
+scaleSpace = CreateScaleSpace(image, sigmas);
+
+%%Find maxima in scale space and threshold them
 [height, width, slice] = size(scaleSpace);
 
-for x=1:height
+xPos = [];
+yPos = [];
+rad = [];
+
+for z=1:slice
     for y=1:width
-        for z=1:slice
-            if(IsMaximum(x, y, z))
-                %TODO thresholding
-                %need to find appropriate one
+        for x=1:height
+            if(IsMaximum(scaleSpace, x, y, z)) %if is maximum - all pixels around == smaller
+                
+                if(scaleSpace(x, y, z) > 110) %do thresholding
+                    xPos = [xPos x];
+                    yPos = [yPos y];
+                    tmpRad = sigmas(z) * sqrt(2);
+                    rad = [rad tmpRad];
+                end
             end
         end
     end
 end
 
-%TODO draw circles
-%radius is sigma * sqrt(2) -> maybe create sigma beforehand and feed to
-%CreateScaleSpace
+%%Draw circles onto image
 
+%%%add path for draw circles function
+addpath ./Functions
+
+show_all_circles(image, yPos', xPos', rad'); %x and y swapped - TODO need to fix
+
+rmpath ./Functions
 
 end
 

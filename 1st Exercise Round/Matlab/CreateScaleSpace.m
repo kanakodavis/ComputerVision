@@ -1,4 +1,4 @@
-function [ scaleSpace ] = CreateScaleSpace( image, levels )
+function [ scaleSpace ] = CreateScaleSpace( image, sigmas )
 %Function that creates the scale space for the scale invariant blob
 %detection
 % Authors
@@ -10,23 +10,22 @@ function [ scaleSpace ] = CreateScaleSpace( image, levels )
 %   scaleSpace: A matrix(size: image.width * image.height * levels)
 %   containing the scale space of the input image
 %
-
-factor = 1.25;
-sigma = 2;
-filterSize = 2 * floor(3 * sigma) + 1;
+image = double(image);
+[levels, ~] = size(sigmas);
 imSize = size(image);
 
 scaleSpace = zeros(imSize(1), imSize(2), levels);
 
 for i = 1:levels
+    sigma = sigmas(i);
+    filterSize = 2 * floor(3 * sigma) + 1;
     logFilter = fspecial('log', filterSize, sigma);
     logFilter = logFilter .* sigma^2;
     
     scaleSpace(:,:,i) = imfilter(image, logFilter, 'replicate');
-    
-    sigma = sigma * factor;
-    filterSize = 2 * floor(3 * sigma) + 1;
 end
+
+scaleSpace = abs(scaleSpace);
 
 end
 
