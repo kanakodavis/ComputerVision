@@ -12,13 +12,16 @@ function [r] = kmeans_assign_datapoints(X,u)
 % Author
 %   Robin Melan
 %
-%
+
 
     r = zeros(size(X,1),1);
 
     for i = 1:size(X)
         s = [0 0 0];
         % Zeile - uZeile --> normalisieren --> sqr
+        % Bsp:  D = 3;
+        %       X(1,:) = 0 0.5020 0
+        %       u(1,:) = 1    0   0
         s(1) = norm(X(i,:) - u(1,:))^2;
         s(2) = norm(X(i,:) - u(2,:))^2;
         s(3) = norm(X(i,:) - u(3,:))^2;
@@ -27,6 +30,5 @@ function [r] = kmeans_assign_datapoints(X,u)
 
         r(i,1) = pos;
     end
-
 
 end
