@@ -7,7 +7,7 @@ function run_task_blob_detection()
 %   * Robin Melan
 
 %constant array with names of the images
-imageNames = {'Images/butterfly.jpg','Images/myimage.jpg'};
+imageNames = {'Images/butterfly.jpg','Images/matrix_test.jpg'};
 for imageName = imageNames
 %% Load images
 image = imread(imageName{1});
@@ -30,7 +30,7 @@ for z=1:slice
         for x=1:height
             if(IsMaximum(scaleSpace, x, y, z)) %if is maximum - all pixels around == smaller
                 
-                if(scaleSpace(x, y, z) > 110) %do thresholding
+                if(scaleSpace(x, y, z) > 110) %do thresholding and store parameters for line drawing
                     xPos = [xPos x];
                     yPos = [yPos y];
                     tmpRad = sigmas(z) * sqrt(2);

@@ -5,7 +5,7 @@ function [ scaleSpace ] = CreateScaleSpace( image, sigmas )
 %   * Matthias Gusenbauer
 % Input
 %   image: The Image in to create the LOG scale space from
-%   levels: defines the number of levels in the scale space
+%   sigmas: the precalculated sigmas for the LOG kernel
 % Output
 %   scaleSpace: A matrix(size: image.width * image.height * levels)
 %   containing the scale space of the input image
