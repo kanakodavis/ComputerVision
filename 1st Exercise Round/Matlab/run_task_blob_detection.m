@@ -25,6 +25,14 @@ xPos = [];
 yPos = [];
 rad = [];
 
+%performance improvement notes:
+%http://www.mathworks.com/matlabcentral/answers/86900-how-to-find-all-neighbours-of-an-element-in-n-dimensional-matrix
+%http://www.mathworks.com/matlabcentral/fileexchange/29330-neighbour-points-in-a-matrix
+%check ind2sub() method for linear indexing -> only one for and then get
+%indices
+%read: http://blogs.mathworks.com/steve/2007/03/28/neighbor-indexing/
+%read on memory optimization: http://www.mathworks.de/company/newsletters/articles/programming-patterns-maximizing-code-performance-by-optimizing-memory-access.html
+
 for z=1:slice
     for y=1:width
         for x=1:height
