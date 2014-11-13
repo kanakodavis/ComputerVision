@@ -8,17 +8,27 @@ function run_task_colorizing()
 %% initialization
 %constant array with names of the images (each image has 3 images in the
 %containing folder which are not aligned (RGB)
-imageNames = {'00125v','00149v','00153v','00351v','00398v','01112v','00882a'};
-SearchSize = 15;
+imageNames = ...
+{'00125v','00149v','00153v','00351v','00398v','01112v','00882a','00245a','00876a','01043a','01251a'}; % all images
+%{'01251a'}; %newest image
+%{'00882a','00245a','00876a','01043a'}; % The Big images
+%{'00153v'}; % the problem image
+%{'00125v','00149v','00153v','00351v','00398v','01112v'}; %the small images
+%{'00125v','00149v','00153v','00351v','00398v','01112v','00882a','00245a','00876a','01043a','01251a'}; % all images
 
 for imageName = imageNames
     %% load images
     
     [R, G, B] = LoadRGBGlassPlateScans(imageName);
+    imageWithoutCorr   = cat(3, R, G, B);
     
     %% align images automatically
     % Take time
     tic;
+    
+    % The misalignment of the images is at a maximum of 5% (Just an
+    % assumption)
+    SearchSize = floor(min(size(R))/20);
     
     G_aligned = FasterAlignWithNCCMetric(R,G,SearchSize);
     B_aligned = FasterAlignWithNCCMetric(R,B,SearchSize);
@@ -26,37 +36,36 @@ for imageName = imageNames
     
     elapsedTimeFast = num2str(toc);
     
-    %% combine and display them 
+    % combine and display them 
     RGB = cat(3, R_aligned, G_aligned, B_aligned);
     figure;
     imshow(RGB);
+    imageWithCorrBonus = RGB;
     
-    % align images automatically
-    % Take time
-     tic
+    if SearchSize < 20
     
-     BestMatchCircShift = AlignWithNCCMetric(R,G,SearchSize);
-    	G_aligned = circshift( G , BestMatchCircShift );
-    
-     BestMatchCircShift = AlignWithNCCMetric(R,B,SearchSize);
-    	B_aligned = circshift( B , BestMatchCircShift );  
+        tic
+        G_aligned = circshift( G , AlignWithNCCMetric(R,G,SearchSize) );
+        B_aligned = circshift( B , AlignWithNCCMetric(R,B,SearchSize) );  
+        R_aligned = R;
+
+        elapsedTimeSimple = num2str(toc);
+
+        % combine and display them 
+        RGB2 = cat(3, R_aligned, G_aligned, B_aligned);
+
+        figure;
+        imshow(RGB2);
+
+        % Save new Image with and without Correlation for the Report
+       
+        imageWithCorr      = RGB2;
+        SaveRGBImagesForReport(imageName, imageWithCorr, elapsedTimeSimple, 'without_bonus');
+
         
-     R_aligned = R;
-     
-     elapsedTimeSimple = num2str(toc);
-     
-     % combine and display them 
-     RGB2 = cat(3, R_aligned, G_aligned, B_aligned);
-   
-%     figure;
-%     imshow(RGB2);
-     
-     %% Save new Image with and without Correlation for the Report
-          
-     imageWithCorrBonus = RGB;
-     imageWithCorr      = RGB2;
-     imageWithoutCorr   = cat(3, R, G, B);
-     SaveRGBImagesForReport(imageName, imageWithoutCorr, imageWithCorr, imageWithCorrBonus, elapsedTimeSimple, elapsedTimeFast);
+    end
+    SaveRGBImagesForReport(imageName, imageWithoutCorr, '', 'unaligned');
+    SaveRGBImagesForReport(imageName, imageWithCorrBonus, elapsedTimeFast, 'with_bonus');
     
 end
 
