@@ -6,51 +6,58 @@ function I_aligned = FasterAlignWithNCCMetric( I_1 , I_2 , SearchSize)
 %   * David Pfahler
 % Input
 %  I_1: The base image which I_2 gets aligned to
-%  I_2: The image that gets aligned with I_1
+%  I_2: The image that gets aligned with I_1 must have the same size
 %  SearchSize: The distance to seachrch for possible displacements of I_1 and I_2
 % Output
 %   I_aligned: The aligned I_2 image
 % Example:
 %   I_aligned = AlignWithNCCMetric( I_1 , I_2 , KernelSize)
 
-% determining the maximum level of a Pyramid so that the length of the
-% smallest pyramid is the Search Size * 2 + 1
-MaximumLevelByImageSize = ceil( log2( max( size( I_2 )/SearchSize*2 + 1 ) ) );
+% determining the maximum level of a pyramid by the maximum of the size
+MaximumLevelByImageSize = ceil( log2( max( size( I_2 )) ) );
 
 % The search size gets divided by 2 for every pyramid we have. So we only
 % can have maximum logarithmus dualis of the search size image pyramids.
 MaximumLevelBySearchSize = ceil(log2(SearchSize));
+
+% Actually the search size should never be greater than the image size. But
+% just for beeing sure...
 NumPyramids = min(MaximumLevelByImageSize,MaximumLevelBySearchSize);
 
 % The SearchSize gets set to 1 because of the above assumptions
 SearchSize = 1;
 
-% Filter the image with the laplacian of the gaussion before calculating
-% the metric to get better features
-% h = fspecial('log');
-% I_FILTERED_1 = imfilter(I_1,h);
-% I_FILTERED_2 = imfilter(I_2,h);
-
 % Create the pyramids cell array
-c_Pyramids = cell(NumPyramids+1,2);
+c_Pyramids = cell(NumPyramids,2);
 c_Pyramids(1,1) = {I_1};
 c_Pyramids(1,2) = {I_2};
 
-% Create pyramids for the LOG of Image 1 and 2
-for i = 1:NumPyramids
+% Create pyramids for the Image 1 and 2 (-1 because the first image is
+% already in the pyramid
+for i = 1:NumPyramids-1
     c_Pyramids(i+1,1) = {impyramid(cell2mat(c_Pyramids(i,1)), 'reduce')};
     c_Pyramids(i+1,2) = {impyramid(cell2mat(c_Pyramids(i,2)), 'reduce')};
 end
 
-for i = NumPyramids+1:-1:1
-    BestMatchCircShift = AlignWithNCCMetric(cell2mat(c_Pyramids(i,1)),cell2mat(c_Pyramids(i,2)),SearchSize);
-    for j = i-1:-1:1
-        BestMatchCircShift = BestMatchCircShift * 2;
-        c_Pyramids(j,2)  = {circshift( cell2mat(c_Pyramids(j,2))  , BestMatchCircShift)};
-    end
-    I_2 = circshift( I_2  , BestMatchCircShift);
+% This is the shift the I_2 image will get shifted after the calculation
+FinShift = [0 0];
+
+% Iterate from the smallest image to the biggest and on each iteration 
+% get a better result for the final shift
+for i = NumPyramids:-1:1
+    
+    % calculate the best match shift for the image pyramid for the base
+    % image of the same image pyramid level and adjust this value with the
+    % previous calculated shift time two because the shift comes from a
+    % lower pyrimd level
+    FinShift = AlignWithNCCMetric( ...
+        cell2mat(c_Pyramids(i,1)), ...
+        cell2mat(c_Pyramids(i,2)), ...
+        SearchSize, ...
+        FinShift * 2);
 end
 
-I_aligned = I_2;
+% Align the output Image with the sum of the multiplied shifts
+I_aligned = circshift( I_2  , FinShift);
 
 end
