@@ -1,7 +1,6 @@
 function [ ] = RunBenchmark( funct )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-
+%RunBenchmark Runs the given task and measures its runtime
+%   Take current time, then run task, then print the elapsed time
 tic;
 
 run(funct);
