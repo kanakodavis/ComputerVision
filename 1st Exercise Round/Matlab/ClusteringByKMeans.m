@@ -29,13 +29,14 @@ function [cluster_idx cluster_center] = ClusteringByKMeans(X,K)
 %     sample(11:end,3) = x(56000:56009,3);
     sample = X;
     k = K;
+    D = size(sample,2); %Dimension of the sample
     
     % Result that I should get:
     %[cluster_idx cluster_center] = kmeans(sample,k,'distance','sqEuclidean','Replicates',5);
 
     
     %% 1. Coose random starting values for the centroids u
-    u = eye(K,size(X,2));
+    u = rand(K,D);
     
 %     % Illustration VORHER
 %     figure, %scatter3(sample(:,1),sample(:,2),sample(:,3), 'c'),

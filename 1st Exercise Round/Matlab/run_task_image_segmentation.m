@@ -26,13 +26,11 @@ for imageName = imageNames
     
     nrows = size(I,1);
     ncols = size(I,2);
-    
     [X1,X2] = ndgrid(1:nrows,1:ncols);
-    x = [reshape(I,nrows*ncols,3) X1(:)./nrows X2(:)./ncols];
-     
+    x = [reshape(I,nrows*ncols,3) X1(:) X2(:)];
+    x = x ./ repmat(max(x),nrows*ncols,1);
     % For Comparing reasons:
-    %[cluster_idx2 cluster_center2] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
-    %kmeans_compute_J(x, k, cluster_idx2, cluster_center2)
+    [cluster_idx2 cluster_center2] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
     
     %% TODO 
     % 1) Apply the color transformation to L*a*b to have a better
@@ -78,6 +76,29 @@ for imageName = imageNames
     figure, imshow(segmented_images{1}), title('objects in cluster 1');
     figure, imshow(segmented_images{2}), title('objects in cluster 2');
     figure, imshow(segmented_images{3}), title('objects in cluster 3');
+    
+    %by coloring all pixels of a cluster with their mean color values. 
+    
+    % Reshaping and showing the clusters 
+    pixel_labels = reshape(cluster_idx2,nrows,ncols);
+    figure, imshow(pixel_labels,[]), title('image labeled by cluster index');
+    
+    % creating three element array
+    segmented_images = cell(1,3);
+    % Creating tiles for three different colors 
+    rgb_label = repmat(pixel_labels,[1 1 3]);
+
+    % Assigning clustered objects to array(segmented_image) 
+    for k = 1:k
+        color = I;
+        color(rgb_label ~= k) = 0;
+        segmented_images{k} = color;
+    end
+
+    % displaying different cluster objects 
+    figure, imshow(segmented_images{1}), title('objects in cluster 1 - original');
+    figure, imshow(segmented_images{2}), title('objects in cluster 2 - original');
+    figure, imshow(segmented_images{3}), title('objects in cluster 3 - original');
 
 end
 

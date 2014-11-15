@@ -26,25 +26,19 @@ function [J] = kmeans_compute_J(image, r, u)
 
 J = 0;
 k = size(u,1); % Number of clusters
-
-% instade of having a runtime of O(|objects|*|k|) we simplify and gain
-% performance out of it:
-
-R = zeros(1,k);
+NumDatapoints = size(image,1); % Number of datapoints
+R = zeros(NumDatapoints,k); %Mean difference of the datapoints
 
 for i = 1:k
-    R(i) = norm(image-repmat(u(i,:),size(image,1),1))^2;
+    u_rep = repmat(u(i,:),NumDatapoints,1);
+    R(:,i) = sum((image-u_rep).^2, 2);
 end
 
 for i = 1:k
     tmp = zeros(size(r));
     tmp(r==i) = 1;
-    
     %        r(n,k) *       || xn - uk ||     ^ 2
-    for j = 1:k
-        J = J + sum(tmp * R(j));
-    end
-
+    J = J + sum(tmp .* R(:,i));
 end
 
 
