@@ -10,21 +10,23 @@ function [r] = kmeans_assign_datapoints(X,u)
 %   r : holds the assigned cluster value of every object of X
 %
 % Author
-%   Robin Melan
+%   * Robin Melan
+%   * David Pfahler
 %
 
 
     r = zeros(size(X,1),1);
+    k = size(u,1); % Number of clusters
 
     for i = 1:size(X)
-        s = [0 0 0];
+        s = zeros(1,k);
         % Zeile - uZeile --> normalisieren --> sqr
         % Bsp:  D = 3;
         %       X(1,:) = 0 0.5020 0
         %       u(1,:) = 1    0   0
-        s(1) = norm(X(i,:) - u(1,:))^2;
-        s(2) = norm(X(i,:) - u(2,:))^2;
-        s(3) = norm(X(i,:) - u(3,:))^2;
+        for j = 1:k
+            s(j) = norm(X(i,:) - u(j,:))^2;
+        end
         % Minimum nehmen und r setzen
         [value,pos] = min(s);
 

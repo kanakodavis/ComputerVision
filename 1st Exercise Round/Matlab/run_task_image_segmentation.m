@@ -27,7 +27,8 @@ for imageName = imageNames
     nrows = size(I,1);
     ncols = size(I,2);
     
-    x = reshape(I,nrows*ncols,3);
+    [X1,X2] = ndgrid(1:nrows,1:ncols);
+    x = [reshape(I,nrows*ncols,3) X1(:)./nrows X2(:)./ncols];
      
     % For Comparing reasons:
     %[cluster_idx2 cluster_center2] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
@@ -38,7 +39,7 @@ for imageName = imageNames
     % performance!
     
     [cluster_idx cluster_center] = ClusteringByKMeans(x,k);
-    kmeans_compute_J(x, k, cluster_idx, cluster_center)
+    kmeans_compute_J(x, cluster_idx, cluster_center)
     
 %     % Creating color transformation from sRGB to L*a*b 
 %     cform = makecform('srgb2lab');

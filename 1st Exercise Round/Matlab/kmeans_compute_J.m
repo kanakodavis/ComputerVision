@@ -1,4 +1,4 @@
-function [J] = kmeans_compute_J(image, k, r, u)
+function [J] = kmeans_compute_J(image, r, u)
 % In K-means clustering the cluster centroids uk (k = 1, .. , K) are
 % computed as the mean of all data points with shortest distance to that
 % centroid. To describe the assignment of data points to clusters, a binary
@@ -13,7 +13,6 @@ function [J] = kmeans_compute_J(image, k, r, u)
 %
 % Input
 %   image : (X) holds values of the image
-%   k : selected k, representing the number of clusters
 %   r : holding the assigned cluster for every object in X
 %   u : holding the old values of the cluster centroids
 %   
@@ -21,43 +20,30 @@ function [J] = kmeans_compute_J(image, k, r, u)
 %   J : value returning of the objective function (distortion measure)
 %
 % Author
-%   Robin Melan
+%   * Robin Melan
+%   * David Pfahler
 
 
 J = 0;
+k = size(u,1); % Number of clusters
 
 % instade of having a runtime of O(|objects|*|k|) we simplify and gain
 % performance out of it:
 
-a = image(:,1) - u(1,1);
-b = image(:,2) - u(1,2);
-c = image(:,3) - u(1,3);
-d = [a b c];
+R = zeros(1,k);
 
-u1 = norm(d)^2;
-
-a = image(:,1) - u(2,1);
-b = image(:,2) - u(2,2);
-c = image(:,3) - u(2,3);
-d = [a b c];
-
-u2 = norm(d)^2;
-
-a = image(:,1) - u(2,1);
-b = image(:,2) - u(2,2);
-c = image(:,3) - u(2,3);
-d = [a b c];
-
-u3 = norm(d)^2;
+for i = 1:k
+    R(i) = norm(image-repmat(u(i,:),size(image,1),1))^2;
+end
 
 for i = 1:k
     tmp = zeros(size(r));
     tmp(r==i) = 1;
     
     %        r(n,k) *       || xn - uk ||     ^ 2
-    J = J + sum(tmp * u1);
-    J = J + sum(tmp * u2);
-    J = J + sum(tmp * u3);
+    for j = 1:k
+        J = J + sum(tmp * R(j));
+    end
 
 end
 
