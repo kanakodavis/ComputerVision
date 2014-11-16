@@ -3,6 +3,7 @@ function [cluster_idx cluster_center] = ClusteringByKMeans(X,K)
 %Function that does the Color Image Segmentation by the K-means Clustering
 % Authors
 %   * Robin Melan
+%   * David Pfahler
 % Input
 %   X: The Image in Format objects and its dimension D so (rows*cols,D)
 %   K: defines the number of clustering, which is defines beforhand
@@ -28,13 +29,14 @@ function [cluster_idx cluster_center] = ClusteringByKMeans(X,K)
 %     sample(11:end,3) = x(56000:56009,3);
     sample = X;
     k = K;
+    D = size(sample,2); %Dimension of the sample
     
     % Result that I should get:
     %[cluster_idx cluster_center] = kmeans(sample,k,'distance','sqEuclidean','Replicates',5);
 
     
     %% 1. Coose random starting values for the centroids u
-    u = eye(size(sample,2));
+    u = rand(K,D);
     
 %     % Illustration VORHER
 %     figure, %scatter3(sample(:,1),sample(:,2),sample(:,3), 'c'),
@@ -63,19 +65,19 @@ while (J_New < J_Old)
     J_Old = J_New;
     if (J_Old == -1)
         % Compute old J Value to compare it with the New J afterwards
-        J_Old = kmeans_compute_J(sample, k, r, u);
+        J_Old = kmeans_compute_J(sample, r, u);
     end
     
     
     %% 3. Compute the new cluster centroids as the mean of all data points
     % assigned to that cluster:
-    u = kmeans_compute_cluster_centroids(sample, k, r, u);
+    u = kmeans_compute_cluster_centroids(sample, r, u);
     
     
     %% 4 Compute J and check for convergence. For this purpose, compute the
     % ratio between the old and new J. If the ratio lies under a given
     % threshold, terminate the clustering, otherwise go to point 2
-    J_New = kmeans_compute_J(sample, k, r, u);
+    J_New = kmeans_compute_J(sample, r, u);
     
     
 %     % Illustration NACHHER
