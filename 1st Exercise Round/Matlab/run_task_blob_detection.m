@@ -1,4 +1,4 @@
-function run_task_blob_detection()
+function run_task_blob_detection(doHalf)
 %Function that starts the code for the Assignment 3: Scale-Invariant Blob
 %Detection 
 % Authors
@@ -7,10 +7,15 @@ function run_task_blob_detection()
 %   * Robin Melan
 
 %constant array with names of the images
-imageNames = {'Images/butterfly.jpg','Images/matrix_test.jpg'};
+imageNames = {'Images/butterfly.jpg','Images/matrix_test_contr.jpg'};
 for imageName = imageNames
 %% Load images
 image = imread(imageName{1});
+
+%%%Half image in size and then run detection
+if doHalf
+   image = imresize(image, 0.5); 
+end
 
 %%Init sigma for LOG convolution
 sigmas = InitSigma(10);
@@ -54,6 +59,9 @@ end
 %%%add path for draw circles function
 addpath ./Functions
 
+%%%%get a blob center and plot response in all sizes
+%%%%take a position from yPos and xPos - create vector with responses at
+%%%%all sizes and call function with responses and sizes -> plot
 show_all_circles(image, yPos', xPos', rad'); %x and y swapped - TODO need to fix
 
 rmpath ./Functions

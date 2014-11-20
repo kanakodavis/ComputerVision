@@ -6,5 +6,6 @@ function main()
 %   * 
     run_task_colorizing();
     run_task_image_segmentation();
-    run_task_blob_detection();
+    run_task_blob_detection(FALSE);
+    run_task_blob_detection(TRUE);
 end

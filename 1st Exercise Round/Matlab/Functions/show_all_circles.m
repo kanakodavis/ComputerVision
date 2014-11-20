@@ -15,6 +15,7 @@ if nargin < 6
    ln_wid = 1.5;
 end
 
+figure;
 imshow(I); hold on;
 
 theta = 0:0.1:(2*pi+0.1);
@@ -27,3 +28,6 @@ Y = cy1+sin(theta).*rad1;
 line(X', Y', 'Color', color, 'LineWidth', ln_wid);
 
 title(sprintf('%d circles', size(cx,1)));
+
+hold off;
+
