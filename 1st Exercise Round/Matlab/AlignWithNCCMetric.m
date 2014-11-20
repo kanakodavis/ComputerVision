@@ -25,6 +25,15 @@ end
 BestMatchMetric = 0;
 BestMatchCircShift = SearchOffset;
 
+% Only search the center 70% of the image to reduce the error from the
+% borders
+CutLeftUpper = floor(size(I_1) .* 0.15);
+CutRightBottom = ceil(size(I_1) .* 0.85);
+x = CutLeftUpper(1):CutRightBottom(1);
+y = CutLeftUpper(2):CutRightBottom(2);
+I_1 = I_1(x,y,:);
+I_2 = I_2(x,y,:);
+
 % Filter the image with the laplacian of the gaussion before calculating
 % the metric to get better features
  h = fspecial('log');
@@ -34,7 +43,7 @@ BestMatchCircShift = SearchOffset;
 for i = SearchOffset(1)-SearchSize:SearchOffset(1)+SearchSize
    for j = SearchOffset(2)-SearchSize:SearchOffset(2)+SearchSize 
        I_2_Shifted = circshift(I_2,[i j]);
-        I_FILTERED_2_Shifted = circshift(I_FILTERED_2,[i j]);
+       I_FILTERED_2_Shifted = circshift(I_FILTERED_2,[i j]);
        % metric that calculates how good the image is aligned
        MatchMetric = corr2(I_1,I_2_Shifted) + corr2(I_FILTERED_1,I_FILTERED_2_Shifted);
 %       MatchMetric = corr2(I_1,I_2_Shifted);
