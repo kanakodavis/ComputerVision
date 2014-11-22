@@ -3,9 +3,11 @@ function PlotLOGResponses( scales, smallResp, bigResp )
 %   Detailed explanation goes here
 
 figure
+hold on
 stem(scales, smallResp, 'filled');
 stem(scales, bigResp, 'r', 'filled');
 xlim([1.5 max(scales)+0.5]);
+hold off
 
 end
 
