@@ -1,4 +1,4 @@
-function run_task_blob_detection(doHalf)
+function run_task_blob_detection()
 %Function that starts the code for the Assignment 3: Scale-Invariant Blob
 %Detection 
 % Authors
@@ -6,66 +6,85 @@ function run_task_blob_detection(doHalf)
 %   * Matthias Gusenbauer
 %   * Robin Melan
 
-%constant array with names of the images
-imageNames = {'Images/butterfly.jpg','Images/matrix_test_contr.jpg'};
-for imageName = imageNames
-%% Load images
-image = imread(imageName{1});
+%variables for stem plot of LOG response
+sigmas = 0;
+smallImResp = 0;
+bigImResp = 0;
 
-%%%Half image in size and then run detection
-if doHalf
-   image = imresize(image, 0.5); 
-end
+for doHalf=0:1
+    %constant array with names of the images
+    imageNames = {'Images/butterfly.jpg','Images/matrix_test_contr.jpg'};
+    for imageName = imageNames
+    %% Load images
+    image = imread(imageName{1});
 
-%%Init sigma for LOG convolution
-sigmas = InitSigma(10);
+    %%%Half image in size and then run detection
+    if doHalf
+       image = imresize(image, 0.5); 
+    end
 
-%%Create scale space with LOG and sigmas
-scaleSpace = CreateScaleSpace(image, sigmas);
+    %%Init sigma for LOG convolution
+    sigmas = InitSigma(10);
 
-%%Find maxima in scale space and threshold them
-[height, width, slice] = size(scaleSpace);
+    %%Create scale space with LOG and sigmas
+    scaleSpace = CreateScaleSpace(image, sigmas);
 
-xPos = [];
-yPos = [];
-rad = [];
+    %%Find maxima in scale space and threshold them
+    [height, width, slice] = size(scaleSpace);
 
-%performance improvement notes:
-%http://www.mathworks.com/matlabcentral/answers/86900-how-to-find-all-neighbours-of-an-element-in-n-dimensional-matrix
-%http://www.mathworks.com/matlabcentral/fileexchange/29330-neighbour-points-in-a-matrix
-%check ind2sub() method for linear indexing -> only one for and then get
-%indices
-%read: http://blogs.mathworks.com/steve/2007/03/28/neighbor-indexing/
-%read on memory optimization: http://www.mathworks.de/company/newsletters/articles/programming-patterns-maximizing-code-performance-by-optimizing-memory-access.html
+    xPos = [];
+    yPos = [];
+    rad = [];
 
-for z=1:slice
-    for y=1:width
-        for x=1:height
-            if(IsMaximum(scaleSpace, x, y, z)) %if is maximum - all pixels around == smaller
-                
-                if(scaleSpace(x, y, z) > 110) %do thresholding and store parameters for line drawing
-                    xPos = [xPos x];
-                    yPos = [yPos y];
-                    tmpRad = sigmas(z) * sqrt(2);
-                    rad = [rad tmpRad];
+    %performance improvement notes:
+    %http://www.mathworks.com/matlabcentral/answers/86900-how-to-find-all-neighbours-of-an-element-in-n-dimensional-matrix
+    %http://www.mathworks.com/matlabcentral/fileexchange/29330-neighbour-points-in-a-matrix
+    %check ind2sub() method for linear indexing -> only one for and then get
+    %indices
+    %read: http://blogs.mathworks.com/steve/2007/03/28/neighbor-indexing/
+    %read on memory optimization: http://www.mathworks.de/company/newsletters/articles/programming-patterns-maximizing-code-performance-by-optimizing-memory-access.html
+
+    for z=1:slice
+        for y=1:width
+            for x=1:height
+                if(IsMaximum(scaleSpace, x, y, z)) %if is maximum - all pixels around == smaller
+
+                    if(scaleSpace(x, y, z) > 110) %do thresholding and store parameters for line drawing
+                        xPos = [xPos x];
+                        yPos = [yPos y];
+                        tmpRad = sigmas(z) * sqrt(2);
+                        rad = [rad tmpRad];
+                    end
                 end
             end
         end
     end
+
+    %%Plot the responses of a keypoint
+    %%%(manually)checked that in both image sizes same point
+    [~, position] = max(rad); 
+
+    %%%Create vector of matrix for plot of LOG response
+    if doHalf
+       smallImResp = reshape(scaleSpace(xPos(position), yPos(position), :), 1, 10); 
+    else
+       bigImResp = reshape(scaleSpace(xPos(position), yPos(position), :), 1, 10);
+    end
+
+
+    %%Draw circles onto image
+
+    %%%add path for draw circles function
+    addpath ./Functions
+
+    show_all_circles(image, yPos', xPos', rad'); %x and y swapped - TODO need to fix
+
+    rmpath ./Functions
+
+    end
+
 end
 
-%%Draw circles onto image
-
-%%%add path for draw circles function
-addpath ./Functions
-
-%%%%get a blob center and plot response in all sizes
-%%%%take a position from yPos and xPos - create vector with responses at
-%%%%all sizes and call function with responses and sizes -> plot
-show_all_circles(image, yPos', xPos', rad'); %x and y swapped - TODO need to fix
-
-rmpath ./Functions
-
-end
+PlotLOGResponses(sigmas, smallImResp, bigImResp);
 
 end
