@@ -21,37 +21,26 @@ for imageName = imageNames
     % display the original image
     %figure, imshow(I), title('Original Image');
     
-    %% Implement the image segmentation
-    % kmeans: http://www.mathworks.in/matlabcentral/fileexchange/8379-kmeans-image-segmentation/content/kmeans.m
+    %% Kmeans image segmentation with D = 3
     
     nrows = size(I,1);
     ncols = size(I,2);
+    x = reshape(I,nrows*ncols,3);
+    % For Comparing reasons:
+    [cluster_idx2 cluster_center2] = ClusteringByKMeans(x,k);
+    
+    kmeans_compute_J(x, cluster_idx2, cluster_center2)
+    
+    %% Kmeans image segmentation with D = 3
+    
     [X1,X2] = ndgrid(1:nrows,1:ncols);
     x = [reshape(I,nrows*ncols,3) X1(:) X2(:)];
     x = x ./ repmat(max(x),nrows*ncols,1);
-    % For Comparing reasons:
-    [cluster_idx2 cluster_center2] = kmeans(x,k,'distance','sqEuclidean','Replicates',5);
-    
-    %% TODO 
-    % 1) Apply the color transformation to L*a*b to have a better
-    % performance!
     
     [cluster_idx cluster_center] = ClusteringByKMeans(x,k);
+    
     kmeans_compute_J(x, cluster_idx, cluster_center)
     
-%     % Creating color transformation from sRGB to L*a*b 
-%     cform = makecform('srgb2lab');
-%     % Applying above color transform to the sRGB image 
-%     lab_he = applycform(I,cform); 
-%     % Converting into double and taking only the 'a*' and 'b*' values, since they hold the color information 
-%     ab = double(lab_he(:,:,2:3));
-%     % obtaining rows and columns of transformed image 
-%     nrows = size(ab,1);
-%     ncols = size(ab,2);
-%     % Reshaping image taking each value column wise to have my objects {x1,x2,...xN} 
-%     ab = reshape(ab,nrows*ncols,2);
-%     % No of clusters to be created with k iterations 
-%     [cluster_idx cluster_center] = kmeans(ab,k,'distance','sqEuclidean','Replicates',5); 
     
     %% Visualize the results
     %by coloring all pixels of a cluster with their mean color values. 
@@ -76,6 +65,9 @@ for imageName = imageNames
     figure, imshow(segmented_images{1}), title('objects in cluster 1');
     figure, imshow(segmented_images{2}), title('objects in cluster 2');
     figure, imshow(segmented_images{3}), title('objects in cluster 3');
+    SaveRGBImagesForReport(imageName,segmented_images{1},'_D_5','_Cluster 1');
+    SaveRGBImagesForReport(imageName,segmented_images{2},'_D_5','_Cluster 2');
+    SaveRGBImagesForReport(imageName,segmented_images{3},'_D_5','_Cluster 3');
     
     %by coloring all pixels of a cluster with their mean color values. 
     
@@ -96,9 +88,12 @@ for imageName = imageNames
     end
 
     % displaying different cluster objects 
-    figure, imshow(segmented_images{1}), title('objects in cluster 1 - original');
-    figure, imshow(segmented_images{2}), title('objects in cluster 2 - original');
-    figure, imshow(segmented_images{3}), title('objects in cluster 3 - original');
+    figure, imshow(segmented_images{1}), title('objects in cluster 1 - D = 3');
+    figure, imshow(segmented_images{2}), title('objects in cluster 2 - D = 3');
+    figure, imshow(segmented_images{3}), title('objects in cluster 3 - D = 3');
+    SaveRGBImagesForReport(imageName,segmented_images{1},'_D_3','_Cluster 1');
+    SaveRGBImagesForReport(imageName,segmented_images{2},'_D_3','_Cluster 2');
+    SaveRGBImagesForReport(imageName,segmented_images{3},'_D_3','_Cluster 3');
 
 end
 
