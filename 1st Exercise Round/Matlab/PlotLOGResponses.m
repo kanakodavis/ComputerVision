@@ -1,6 +1,14 @@
 function PlotLOGResponses( scales, smallResp, bigResp )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+% PlotLOGResponses is a simple function that creates a stem plot of two
+% different data sets.
+% Authors
+%   * Matthias Gusenbauer
+% Input
+%   scales: The sigmas used for scale space calculation
+%   smallResp: Responses of the half sized image for the given sigmas
+%   bigResp: Responses of the full sized image for the given sigmas
+% Output
+%   window with plot
 
 figure
 hold on
