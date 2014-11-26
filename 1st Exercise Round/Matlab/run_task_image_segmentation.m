@@ -29,7 +29,7 @@ for imageName = imageNames
     % For Comparing reasons:
     [cluster_idx2 cluster_center2] = ClusteringByKMeans(x,k);
     
-    kmeans_compute_J(x, cluster_idx2, cluster_center2)
+    kmeans_compute_J(x, cluster_idx2, cluster_center2);
     
     %% Kmeans image segmentation with D = 3
     
@@ -39,7 +39,7 @@ for imageName = imageNames
     
     [cluster_idx cluster_center] = ClusteringByKMeans(x,k);
     
-    kmeans_compute_J(x, cluster_idx, cluster_center)
+    kmeans_compute_J(x, cluster_idx, cluster_center);
     
     
     %% Visualize the results
