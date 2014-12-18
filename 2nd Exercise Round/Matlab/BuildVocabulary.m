@@ -1,8 +1,5 @@
-function [ C ] = BuildVocabulary(folder, num_clusters)
-% Function that builds a vocabulary of visual words by sampling many local
-% features from the given training set.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Long description:
+function [ C ] = BuildVocabulary(training_set, num_clusters)
+%% Builds a vocabulary of visual words
 % Function that builds a vocabulary of visual words by sampling many local
 % features from the given training set.(i.e. 100’s of thousands of
 % features) and then clustering them with K-means. The number of K-means
@@ -26,44 +23,48 @@ function [ C ] = BuildVocabulary(folder, num_clusters)
 % you should apply K-means clustering to find the visual words. vl_kmeans
 % can be used here for performance reasons. The words are finally stored in
 % the matrix C of size 128x num_clusters.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authors
 %   * David Pfahler
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Input
-%  * folder: This is the folder that contains the training data. It 
-% contains several folders wich have the names of the classes and contain 
-% the images.
+%  * training_set: This is the training data. It contains images and their
+%  category names.
 %  * num_clusters: The number of k-mean clusters is also the size of the 
 % vocabulary. This means that the 128 dimensional SIFT feature space is 
 % partitioned into this number of regions.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Output
-%   C: Get the centroits of the clusters 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   C: The centroits of the clusters with size 128x num_clusters.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Example:
-%   C = BuildVocabulary(folder, num_clusters);
+%   C = BuildVocabulary(training_set, num_clusters);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Load the Images 
-% Load the images from the given folder into a cell array and keep the
-% name of the category.
+num_features = size(training_set(:,1),1)*100;
+features = zeros(128,num_features);
+num_features_per_image = 100;
+image_id = 1;
+%% Get visual words
+for c_I = training_set(:,1)'
+    I = single(cell2mat(c_I));
+    % collect dense SIFT features
+    % for faster feature extraction only 100 features get extracted per
+    % image.
+    step = floor(min(size(I))/10);
+    [f, d] = vl_dsift(I, 'Step', step, 'Fast');
+    
+    %optionally select only a random subset of features per image for the
+    %overall set (the function randsample might be helpful)
+    chosen_random_features = randsample(size(d,2),num_features_per_image);
+    
+    % add the features of the current image to the feature space.
+    features(:,1+(image_id-1)*100:image_id*100) = d(:,chosen_random_features);
+    image_id = image_id + 1;
+end
 
-[c_images,c_category_names] = GetInput(folder);
+%% apply K-means clustering 
+% to find the centeroits of the classification clustering
+C = vl_kmeans(features,num_clusters);
 
-% The function extracts dense SIFT features from all the images contained
-% in the category subfolders of the general training folder (argument
-% folder) and collect them for K-means clustering. For feature extraction
-% we use the function vl_dsift. Please note that we do not necessarily need
-% to extract a SIFT feature for every pixel for vocabulary creation, e.g.
-% around 100 features per image are enough to "capture" the approximately
-% correct distribution of SIFT features for the given image data. Hence,
-% use the parameters 'Step' and 'Fast' for vl_dsift and optionally select
-% only a random subset of features per image for the overall set (the
-% function randsample might be helpful). To iterate all images, the
-% function dir can be used. After all SIFT features have been collected,
-% you should apply K-means clustering to find the visual words. vl_kmeans
-% can be used here for performance reasons. The words are finally stored in
-% the matrix C of size 128x num_clusters.
-
-C = 0;
 end

@@ -9,26 +9,28 @@ function run_task_scene_recognition()
 % into 50 regions
 num_clusters = 50; 
 
-% This is the folder that contains the training data. It contains several
-% folders wich have the names of the classes and contain the images.
-folder = 'Material\train';
+% Load the images from the given folder into a cell array and keep the
+% name of the category.
+training_set = GetInput('Material\train');
+
+% The same for the test folder:
+test_set = GetInput('Material\test');
+
 
 %% Step 1: build a vocabulary of visual words.
 
-% Get the centroits of the clusters 
-C = BuildVocabulary(folder, num_clusters);
+C = BuildVocabulary(training_set, num_clusters);
 
 %% Step 2: build a feature representation for every image in the training set
 
-[training, group] = BuildKNN(folder,C);
+[training, group] = BuildKNN(training_set,C);
 
 %% Step 3: classify all the images of the test set
 
-conf_matrix = ClassifyImages(folder,C,training,group);
+conf_matrix = ClassifyImages(test_set,C,training,group);
 
-
-
-
+%% Step 4: Visualize the results
+plot(conf_matrix);
 
 end
 
