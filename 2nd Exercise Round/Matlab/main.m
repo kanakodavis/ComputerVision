@@ -2,6 +2,11 @@ function main()
 %main Launches all task for assigment 2 ? Image stitching and scene
 %recognition
 
+%Check if VL toolbox is installed and install if not
+if (~exist('vl_version'))
+    run('vlfeat/toolbox/vl_setup');
+end
+
 run_task_image_stitching();
 run_task_scene_recognition();
 
