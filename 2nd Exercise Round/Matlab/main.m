@@ -7,6 +7,8 @@ if (~exist('vl_version'))
     run('vlfeat/toolbox/vl_setup');
 end
 
+addpath('Material');
+
 run_task_image_stitching();
 run_task_scene_recognition();
 

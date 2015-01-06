@@ -1,6 +1,13 @@
 function run_task_image_stitching()
 %run_task_image_stitching Performing image stitching on given images
 
+%Check if VL toolbox is installed and install if not
+if (~exist('vl_version'))
+    run('vlfeat/toolbox/vl_setup');
+end
+
+addpath('Material');
+
 ImageNames = {'Material/campus','Material/officeview'};
 ImageFileType = '.jpg';
 

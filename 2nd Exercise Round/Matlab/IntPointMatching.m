@@ -3,7 +3,20 @@ function [ tbd ] = IntPointMatching( image1, image2 )
 %   Perform interestpoint matching and registration on two consecutive
 %   images
 
+descriptor1 = image1{1, 3};
+descriptor2 = image2{1, 3};
 
+%Matches contains the indices of the original (first) AND closest
+%descriptor in the other (second) image
+[matches, scores] = vl_ubcmatch(descriptor1, descriptor2);
+
+%TODO retrieve points from image via matches and then feed to
+%match_plot(image1, image2, points1, points2);
+%probably each column in descriptor == 1 descriptor -> index from matches
+%== column index
+%point probably in image1{1, 2} (each column of image1{1, 2} corresponds to one in image{1, 3})
+%according to website: A frame is a disk of center f(1:2), scale f(3) and orientation f(4)
+%so 1:2 from a frame from image1{1, 2} should be the points
     
     %Part B
     %%1) take two consecutive images
