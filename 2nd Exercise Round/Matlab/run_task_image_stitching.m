@@ -18,9 +18,14 @@ for imageName = ImageNames
     SIFTDat = cell(5, 3);
     for i=1:size(Images,2)
         [key, feat] = GetSIFTFeatures(Images{i}, true);
-        SIFTDat{1, 1} = Images{i};
-        SIFTDat{1, 2} = key;
-        SIFTDat{1, 3} = feat;
+        SIFTDat{i, 1} = Images{i};
+        SIFTDat{i, 2} = key;
+        SIFTDat{i, 3} = feat;
+    end
+    
+    for i=1:size(Images,2)
+        %Part B
+        tbd = IntPointMatching(SIFTDat(i, :), SIFTDat(mod((i+1),5), :));
     end
     
     %Do image processing
