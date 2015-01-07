@@ -11,7 +11,7 @@ num_clusters = 50;
 
 % Load the images from the given folder into a cell array and keep the
 % name of the category.
-training_set = GetInput('Material\train');
+[training_set , category_names] = GetInput('Material\train');
 
 % The same for the test folder:
 test_set = GetInput('Material\test');
@@ -29,8 +29,31 @@ C = BuildVocabulary(training_set, num_clusters);
 
 conf_matrix = ClassifyImages(test_set,C,training,group);
 
-%% Step 4: Visualize the results
-plot(conf_matrix);
+%% stuff
+conf_matrix = conf_matrix / max(sum(conf_matrix));
 
+%% Step 4: Visualize the results
+
+figure;
+imagesc(conf_matrix);
+colormap(flipud(gray));
+textStrings = num2str(conf_matrix(:),'%0.2f');
+textStrings = strtrim(cellstr(textStrings)); 
+numCategories = size(unique(group),1);
+[x,y] = meshgrid(1:numCategories);   %# Create x and y coordinates for the strings
+hStrings = text(x(:),y(:),textStrings(:),...      %# Plot the strings
+                'HorizontalAlignment','center');
+midValue = mean(get(gca,'CLim'));  %# Get the middle value of the color range
+textColors = repmat(conf_matrix(:) > midValue,1,3);  %# Choose white or black for the
+                                             %#   text color of the strings so
+                                             %#   they can be easily seen over
+                                             %#   the background color
+set(hStrings,{'Color'},num2cell(textColors,2));  %# Change the text colors
+
+set(gca,'XTick',1:numCategories,...                         %# Change the axes tick marks
+        'XTickLabel',category_names,...  %#   and tick labels
+        'YTick',1:numCategories,...
+        'YTickLabel',category_names,...
+        'TickLength',[0 0]);
 end
 

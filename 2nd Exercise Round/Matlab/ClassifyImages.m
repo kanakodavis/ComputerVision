@@ -56,4 +56,7 @@ for i = unique(group)'
     [a,b]=hist(current_class,unique(current_class));
     conf_matrix(i,b)=a;
 end
+%% normalize confusion matrix
+%conf_matrix = conf_matrix/max(max(conf_matrix));
+
 end

@@ -1,4 +1,4 @@
-function [ c_images ] = GetInput(folder)
+function [ c_images , c_categories] = GetInput(folder)
 %% Loads the categories
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Authors
@@ -19,6 +19,7 @@ currentDir = pwd;
 base_listing = dir(folder);
 cd(folder);
 c_images = cell(0,2);
+c_categories = cell(0,1);
 skipped = 0;
 % open each directory and load all images from that directory.
 for i = 1 : size( base_listing, 1 )
@@ -36,6 +37,7 @@ for i = 1 : size( base_listing, 1 )
          c_current_images{j,2} = i-skipped;
        end
        c_images = [c_images; c_current_images];
+       c_categories = [c_categories; base_listing(i).name];
        cd('..');
     else
         skipped = skipped +1;
