@@ -30,7 +30,7 @@ C = BuildVocabulary(training_set, num_clusters);
 conf_matrix = ClassifyImages(test_set,C,training,group);
 
 %% stuff
-conf_matrix = conf_matrix / max(sum(conf_matrix));
+conf_matrix = conf_matrix ./ repmat(sum(conf_matrix,2),1,size(conf_matrix',1));
 
 %% Step 4: Visualize the results
 
