@@ -32,7 +32,7 @@ for imageName = ImageNames
     
     for i=1:size(Images,2)
         %Part B
-        [tImage homography] = IntPointMatching(SIFTDat(i, :), SIFTDat(mod((i+1),5), :));
+        [tImage, homography] = IntPointMatching(SIFTDat(i, :), SIFTDat(mod((i+1),5), :));
     end
     
     %Do image processing

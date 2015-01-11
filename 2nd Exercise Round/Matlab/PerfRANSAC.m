@@ -4,7 +4,8 @@ function [ homography ] = PerfRANSAC( points1, points2 )
 %   Detailed explanation goes here
 
 N = 1000;
-bestInliers = 0;
+bestInliersCnt = 0;
+bestInliers = 0; %not necessary
 bestHomo = 0;
 
 
@@ -17,11 +18,13 @@ for(i=1:N)
     
     try
         %b) - d)
-        [nrInliers TFORM] = tformAInliers(points1, points2, rndPnts1, rndPnts2);
+        [nrInliers, inliers, TFORM] = tformAInliers(points1, points2, rndPnts1, rndPnts2);
         
         %if new calculation is better than old update result
-        if(nrInliers > bestInliers)
-            bestInliers = nrInliers;
+        if(nrInliers > bestInliersCnt)
+            disp(sprintf('Best match - #of inliers %d', nrInliers));
+            bestInliersCnt = nrInliers;
+            bestInliers = inliers; %not necessary
             bestHomo = TFORM;
         end
         
@@ -32,13 +35,13 @@ for(i=1:N)
 end
 
 %4) after N runs take best homography and reestimate with all points
-[blup TFORM] = tformAInliers(points1, points2, points1, points2);
-
-homography = TFORM;
+points1 = tformfwd(bestHomo, points1(:,1), points1(:,2));
+%points2 = tformfwd(bestHomo, points2(:,1), points2(:,2));
+[~, ~, homography] = tformAInliers(points1, points2, points1, points2);
 
 end
 
-function [ inliers homography ] = tformAInliers( points1, points2, rndPnts1, rndPnts2)
+function [ nrInliers, inliers, homography ] = tformAInliers( points1, points2, rndPnts1, rndPnts2)
 
 T = 5;
 
@@ -49,10 +52,11 @@ homography = cp2tform(rndPnts2, rndPnts1, 'projective');
 trnsfrmdPnts = tformfwd(homography, points1(:,1), points1(:,2));
 
 %d) calc euclidean distance
-distance = (trnsfrmdPnts - points2).^2;
+distance = (trnsfrmdPnts - points2).^2; %one line sqrt(sum(.))
 distance = sqrt(distance(:, 1) + distance(:, 2));
 
 %do thresholding
-inliers = sum(distance<T);
+inliers = distance<=T;
+nrInliers = sum(inliers);
 
 end
