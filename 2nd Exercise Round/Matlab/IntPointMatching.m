@@ -1,4 +1,4 @@
-function [ tbd ] = IntPointMatching( image1, image2 )
+function [ transImage homography ] = IntPointMatching( image1, image2 )
 %IntPointMatching Summary of this function goes here
 %   Perform interestpoint matching and registration on two consecutive
 %   images
@@ -10,6 +10,26 @@ descriptor2 = image2{1, 3};
 %descriptor in the other (second) image
 [matches, scores] = vl_ubcmatch(descriptor1, descriptor2);
 
+matchedDesc1 = descriptor1(:,matches(1,:));
+matchedDesc2 = descriptor2(:,matches(2,:));
+
+points1 = image1{1, 2};
+points1 = points1(1:2,matches(1,:))';
+
+points2 = image2{1, 2};
+points2 = points2(1:2,matches(2,:))';
+
+%Plot matches
+match_plot(im2double(image1{1,1}), im2double(image2{1,1}), points1, points2);
+
+%Do RANSAC
+homography = PerfRANSAC(points1, points2);
+
+%5 Transform image
+%transImage = imtransform(image1{1,1}, homography, 'XData', [1 size(image1{1,1}, 2)], 'YData', [1 size(image1{1,1}, 1)], 'XYScale', 1);
+
+
+%NOTES
 %TODO retrieve points from image via matches and then feed to
 %match_plot(image1, image2, points1, points2);
 %probably each column in descriptor == 1 descriptor -> index from matches
