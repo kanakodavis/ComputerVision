@@ -6,12 +6,14 @@ if (~exist('vl_version'))
     run('vlfeat/toolbox/vl_setup');
 end
 
+close all;
+
 addpath('Material');
 
 ImageNames = {'Material/campus','Material/officeview'};
 ImageFileType = '.jpg';
 
-doPlot = true; %TODO for Report see images = true
+doPlot = true; % TODO for Report see images = true
 
 for imageName = ImageNames
     
@@ -45,7 +47,7 @@ for imageName = ImageNames
     H_5_4 = IntPointMatching(SIFTDat(5, :), SIFTDat(4, :), doPlot);
         
     % if needed
-    H_3_3 = maketform('affine',[1 0 0 ; 0 1 0; 0 0 1])
+    H_3_3 = maketform('affine',[1 0 0 ; 0 1 0; 0 0 1]);
     
     
     %% Choose a reference image - create composite homographies to map an 
@@ -87,24 +89,55 @@ for imageName = ImageNames
     
     
     %% Transform all images to the plane defined by the reference image
+    TransfImages = cell(1, 5);
     
-    [transImage1] = imtransform(Images{1}, H_1_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(transImage1);
+    [TransfImages{1}] = imtransform(Images{1}, H_1_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    figure, imshow(TransfImages{1});
 
-    [transImage2] = imtransform(Images{2}, H_2_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(transImage2);
+    [TransfImages{2}] = imtransform(Images{2}, H_2_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    figure, imshow(TransfImages{2});
 
-    [transImage3] = imtransform(Images{3}, H_3_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(transImage3);
+    [TransfImages{3}] = imtransform(Images{3}, H_3_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    figure, imshow(TransfImages{3});
 
-    [transImage4] = imtransform(Images{4}, H_4_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(transImage4);
+    [TransfImages{4}] = imtransform(Images{4}, H_4_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    figure, imshow(TransfImages{4});
 
-    [transImage5] = imtransform(Images{5}, H_5_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(transImage5);
+    [TransfImages{5}] = imtransform(Images{5}, H_5_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    figure, imshow(TransfImages{5});
 
-    %% Blend overlapping color values in a way to avoid seams. Method called feathering
-    figure, imshow(transImage1+transImage2+transImage3+transImage4+transImage5)
+    %% 5. Blend overlapping color values in a way to avoid seams. Method called feathering
+    % ---- delete me -----
+    f = TransfImages{1};
+    for i = 2:5
+        f = f + TransfImages{i};
+    end
+    figure, imshow(f);
+    % ---- delete me end -
+    
+    bw = zeros(size(TransfImages{1})); 
+    middle = round(size(TransfImages{1})/2);
+    bw(middle(1),middle(2)) = 1; 
+    interpolationFactor = uint8(bwdist(bw,'euclidean'));
+    
+        
+    zaehler = uint8(zeros(size(TransfImages{1})));
+    for i=1:5
+        notBlack = uint8( (TransfImages{i}==0) ==0);
+        zaehler = zaehler + notBlack .* interpolationFactor;
+    end
+    
+    
+    rgb = TransfImages{1} .* interpolationFactor;
+    for i=2:5
+        rgb = rgb + TransfImages{i} .* interpolationFactor;
+    end
+            
+    % Create Panorama Picture
+    panorama = uint8(zeros(size(TransfImages{1})));
+    panorama = rgb ./ zaehler;
+    
+    figure, imshow(panorama);
 end
 
 end
