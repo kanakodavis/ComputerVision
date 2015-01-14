@@ -30,10 +30,19 @@ for imageName = ImageNames
         SIFTDat{i, 3} = feat;
     end
     
-    for i=1:size(Images,2)
-        %Part B
-        [tImage, homography] = IntPointMatching(SIFTDat(i, :), SIFTDat(mod((i+1),5), :));
+    % C1 - Determine the homographies between all image pairs from left to
+    % right. e.g. imagePairs{1,2} represents Homography H(1-2)
+    imagePairs = cell(4,2);
+    for i = 1:(size(Images,2)-1)
+        [tImage, homography] = IntPointMatching(SIFTDat(i, :), SIFTDat(i+1, :));
+        imagePairs{i,1} = tImage;
+        imagePairs{i,2} = homography;
     end
+    
+    %for i=1:size(Images,2)
+        %Part B
+    %    [tImage, homography] = IntPointMatching(SIFTDat(i, :), SIFTDat(mod((i+1),5), :));
+    %end
     
     %Do image processing
     
