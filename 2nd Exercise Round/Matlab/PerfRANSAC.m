@@ -37,9 +37,22 @@ for(i=1:N)
 end
 
 %4) after N runs take best homography and reestimate with all points
-points1 = tformfwd(bestHomo, points1(:,1), points1(:,2));
+% saving only the inliners from points1 and 2
+m1 = zeros(bestInliersCnt,2);
+m2 = zeros(bestInliersCnt,2);
+
+pos = 1;
+for i = 1:size(bestInliers,1)
+    if (bestInliers(i) == 1)
+        m1(pos,:) = points1(i,:);
+        m2(pos,:) = points2(i,:);
+        pos = pos + 1;
+    end
+end
+
+%points1 = tformfwd(bestHomo, points1(:,1), points1(:,2));
 %points2 = tformfwd(bestHomo, points2(:,1), points2(:,2));
-[~, ~, homography] = tformAInliers(points1, points2, points1, points2);
+[~, ~, homography] = tformAInliers(points1, points2, m1, m2);
 
 end
 

@@ -26,7 +26,6 @@ match_plot(im2double(image1{1,1}), im2double(image2{1,1}), points1, points2);
 homography = PerfRANSAC(points1, points2, image1, image2);
 
 %5 Transform image
-disp('Wrong here');
 transImage = imtransform(image1{1,1}, homography);
 imshow(transImage);
 %transImage = imtransform(image1{1,1}, homography, 'XData', [1 size(image1{1,1}, 2)], 'YData', [1 size(image1{1,1}, 1)], 'XYScale', 1);
