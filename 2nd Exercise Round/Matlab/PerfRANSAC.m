@@ -1,4 +1,4 @@
-function [ homography ] = PerfRANSAC( points1, points2 )
+function [ homography ] = PerfRANSAC( points1, points2 ,image1, image2)
 %PerfRANSAC Performs RANSAC N times in order to find matching points and
 %correct homography
 %   Detailed explanation goes here
@@ -16,6 +16,8 @@ for(i=1:N)
     rndPnts1 = points1(randoms,:);
     rndPnts2 = points2(randoms,:);
     
+    %match_plot(im2double(image1{1,1}), im2double(image2{1,1}), rndPnts1, rndPnts2);
+        
     try
         %b) - d)
         [nrInliers, inliers, TFORM] = tformAInliers(points1, points2, rndPnts1, rndPnts2);
@@ -46,7 +48,7 @@ function [ nrInliers, inliers, homography ] = tformAInliers( points1, points2, r
 T = 5;
 
 %b) estimate transformation ob rndPnts1 onto rndPnts2
-homography = cp2tform(rndPnts2, rndPnts1, 'projective');
+homography = cp2tform(rndPnts1, rndPnts2, 'projective');
 
 %c) transform the points 
 trnsfrmdPnts = tformfwd(homography, points1(:,1), points1(:,2));

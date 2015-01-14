@@ -23,7 +23,7 @@ points2 = points2(1:2,matches(2,:))';
 match_plot(im2double(image1{1,1}), im2double(image2{1,1}), points1, points2);
 
 %Do RANSAC
-homography = PerfRANSAC(points1, points2);
+homography = PerfRANSAC(points1, points2, image1, image2);
 
 %5 Transform image
 disp('Wrong here');

@@ -24,7 +24,7 @@ for imageName = ImageNames
     %Part A
     SIFTDat = cell(5, 3);
     for i=1:size(Images,2)
-        [key, feat] = GetSIFTFeatures(Images{i}, true);
+        [key, feat] = GetSIFTFeatures(Images{i}, false);
         SIFTDat{i, 1} = Images{i};
         SIFTDat{i, 2} = key;
         SIFTDat{i, 3} = feat;
