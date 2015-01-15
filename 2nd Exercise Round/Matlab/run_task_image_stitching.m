@@ -13,7 +13,7 @@ addpath('Material');
 ImageNames = {'Material/campus','Material/officeview'};
 ImageFileType = '.jpg';
 
-doPlot = true; % TODO for Report see images = true
+doPlot = false; % TODO for Report see images = true
 
 for imageName = ImageNames
     
