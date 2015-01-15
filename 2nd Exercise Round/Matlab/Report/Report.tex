@@ -5,7 +5,7 @@
 %
 
 %{{{ misc
-\documentclass[subfigure,epsfig,fleqn,float,ausarbeitung]{scrartcl}
+\documentclass[subfigure,epsfig,fleqn,float,numbers=noenddot]{scrartcl}
 
 \usepackage{graphicx}
 \usepackage{epstopdf}
@@ -67,6 +67,11 @@
 \renewcommand{\floatpagefraction}{0.9}
 \renewcommand{\textfraction}{0.1}
 
+% Set the Counters like in the exercise sheet
+\setcounter{section}{3}
+\renewcommand{\thesection}{Assignment \arabic{section}:}
+\renewcommand{\thesubsection}{\Alph{subsection}.}
+
 %\renewcommand{\captionlabelfont}{\fontfamily{phv}\fontseries{bx}\fontsize{10}{10pt}\selectfont}
 %\renewcommand{\captionfont}{\fontfamily{phv}\fontsize{10}{12pt}\selectfont}
 %\setlength{\captionmargin}{0.5 cm}
@@ -83,10 +88,10 @@
 
 %make title bold and 14 pt font (Latex default is non-bold, 16pt) 
 \title{~\\
-  ~\\
-  \fontsize{14}{14pt} \bf 2nd Exercise Round
-	 ~\\
-  \fontsize{12}{12pt} \bf Computer Vision 183.585 VU 3.0 4.5 ECTS}
+	\fontsize{12}{12pt} \bf Computer Vision 183.585 VU 3.0 4.5 ECTS
+  ~\\[0.7cm]
+  \fontsize{14}{14pt} \bf 2nd Exercise Round}
+  
 
 %for single author 
 \author{~\\
@@ -106,10 +111,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONTENT
 
-\section{Section}
+\section{Image Stitching}
 \label{sec:1}
 
-\subsection{Sub Section}
+\subsection{SIFT Interest Point Detection}
+\label{sec:A}
+
+\subsection{Interest Point Matching and Image Registration}
+\label{sec:B}
+
+\subsection{Image Stitching}
+\label{sec:C}
+
+\section{Scene Recognition with Bag of VisualWords}
 \label{sec:2}
 
 \begin{figure}
