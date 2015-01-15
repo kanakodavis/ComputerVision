@@ -26,14 +26,26 @@ for i = 1 : size( base_listing, 1 )
     % if it is a directory go into it.
     if base_listing( i ).isdir == 1 && ~strcmpi(base_listing( i ).name,'.') && ~strcmpi(base_listing( i ).name,'..')
        current_listing = dir(base_listing(i).name);
+       
        % remove directories . and ..
        current_listing = current_listing(~[current_listing.isdir]);
+       
+       % jump into the directory
        cd(base_listing(i).name);
        num_images = size(current_listing, 1 ); 
        c_current_images = cell(num_images,2);
-       % start with 3 to avoid the . and ..
+       
        for j = 1 : num_images
-         c_current_images{j,1} = imread ( [current_listing( j ).name ]);
+         % read the image
+         image = imread ( [current_listing( j ).name ]);
+         
+         % if it is rgb convert it to grayscale
+         if size(image, 3) == 3
+             c_current_images{j,1} = rgb2gray(image);
+         else
+             c_current_images{j,1} = image;
+         end
+         
          c_current_images{j,2} = i-skipped;
        end
        c_images = [c_images; c_current_images];
