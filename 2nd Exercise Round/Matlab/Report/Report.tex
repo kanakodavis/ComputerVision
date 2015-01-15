@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{amssymb}
 
 \usepackage{pgfplots}
 
@@ -129,7 +130,7 @@ As the first part of the assignment we need to extract SIFT features out of ever
 
 \subsection{Interest Point Matching and Image Registration}
 \label{sec:B}
-The next step consists of determining the homographies between all image pairs from left to right. So we start of with computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{4,5}$.\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
+The next step consists of determining the homographies between all image pairs from left to right. So we start of with computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{5,4}$ (I switch 5 and 4 because I need to transform the 5th image into the 4th, if I am taking the image in the middle as reference, see further \ref{sec:C}).\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
 To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the euclidean distance between them.\\
 	\begin{figure}[H]
 		\includegraphics[width=0.85\textwidth]{./img/allMatches.jpg}
@@ -161,8 +162,76 @@ nrInliers = sum(inliers);
 
 \subsection{Image Stitching}
 \label{sec:C}
-So after we determined the homographies between all the image pairs we select the image in the middle (in our case Image 3) to be our reference image and compute all homographies that map the other images to our reference. 
+So after we determined the homographies between all the image pairs we select the image in the middle (in our case Image 3) to be our reference image and compute all homographies that map the other images to our reference:
+\begin{equation*}
+\\H_{1,3} = H_{2,3} * H_{1,2}; \\
+H_{5,3} = H_{4,3} * H_{5,4}; 
+\end{equation*}
+Before we can stitch our images into one panorama picture we need to compute the size the output image is going to have. For this information we can take the method $imtransform$ with our new homographies and as a result we get the new size (xData, yData) of the transformed image, which is saved in our case for all 4 images (we don't need to compute the reference image, because we know it is going to be in the middle of the panorama picture) in an array: 
+\begin{lstlisting}
+	%% saves the dimensions of all the transformed images
+	xLim = zeros(4,2);
+	yLim = zeros(4,2);
+	
+	[transImage, xLim(1,:), yLim(1,:)] = imtransform(Images{1}, H_1_3);
+	...
+	
+	%% Getting the Coordinates for final Image
+	xMin = min(min(xLim));
+	xMax = max(max(xLim));
+    
+	yMin = min(min(yLim));
+	yMax = max(max(yLim));
+    
+	%% Width and Height of panorama image.
+	width  = round(xMax - xMin);	
+	height = round(yMax - yMin);
+\end{lstlisting}
 
+Now that we know the output dimensions of our final panorama image we can transform all of our images into that particular size by using again the $imtransform$ method but this time adding our appropriate dimensions [xMin xMax] and [yMin yMax] as our XData and YData parameters. Given all transformed images, the final step is to blend them together in a way to avoid seams. To do this we use an $\alpha$ channel where the value of $\alpha$ for an image is 0 at all border pixels and 1 at the maximum distance from the border. The remaining values are linearly interpolated (see Figure \ref{img:bwdist}). For Example our interpolation value $\alpha$ would look like Figure \ref{img:interpolation}. the final color at a pixel in the output image is computed as the $\alpha$-weighted sum of overlapping images. More precisely, if there are $n$ images overlapping at pixel position $(x,y), I_i(x,y), i = 1...n$ with color $(R_i,G_i,B_i)$ and weighting factors $\alpha_i$, the color values in the stitched output image O are computed as:
+\begin{equation*}
+	O(x,y) = \frac{\sideset{}{_{i=1}^n}\sum_{} (R_i,G_i,B_i) * \alpha_i} {\sideset{}{_{i=1}^n}\sum_{} \alpha_i}
+\end{equation*}
+This blending method is called $feathering$.
+	\begin{figure}[H]
+		\includegraphics[width=0.75\textwidth]{./img/bwdist.jpg}
+		\caption{To compute our $\alpha$ channel we used the method $bwdist$ with the euclidean distance method}
+		\label{img:bwdist}
+	\end{figure}
+	\begin{figure}[H]
+		\includegraphics[width=0.75\textwidth]{./img/interpolationFactor.jpg}
+		\caption{$\alpha$ channel for panorama picture}
+		\label{img:interpolation}
+	\end{figure}
+	
+\paragraph{Results}
+Our first set of images $campus1...5.jpg$ with $feathering$:
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withBlending.jpg}
+		\caption{}
+		\label{img:withBlend}
+\end{figure}
+And without $feathering$ (the transformed images are laid over each other from left to right):
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withoutBlending.jpg}
+		\caption{}
+		\label{img:withoutBlend}
+\end{figure} 
+Our second set of images $officeview1...5.jpg$ with $feathering$:
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withBlending2.jpg}
+		\caption{}
+		\label{img:withBlend2}
+\end{figure}
+And without $feathering$ (the transformed images are laid over each other from left to right):
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withoutBlending2.jpg}
+		\caption{}
+		\label{img:withoutBlend2}
+\end{figure}
+
+Especially looking at the first image we see that some of the images could not be overlaid correctly, which means that there still were some small outliers which distorted the homography so that the final image is at some parts a little blurry. 
+With the second sample we detect the $feathering$ effect much better than for the first image because the shading through the image is continuous. 
 
 \pagebreak
 \section{Scene Recognition with Bag of VisualWords}
