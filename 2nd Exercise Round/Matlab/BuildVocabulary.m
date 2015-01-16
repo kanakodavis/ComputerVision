@@ -41,21 +41,19 @@ function [ C ] = BuildVocabulary(training_set, num_clusters)
 %   C = BuildVocabulary(training_set, num_clusters);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-num_features = size(training_set(:,1),1)*100;
-features = zeros(128,num_features);
 num_features_per_image = 100;
+num_features = size(training_set(:,1),1)*num_features_per_image;
+features = zeros(128,num_features);
 image_id = 1;
 %% Get visual words
 for c_I = training_set(:,1)'
     I = single(cell2mat(c_I));
-    % collect dense SIFT features
-    % for faster feature extraction only 100 features get extracted per
-    % image.
+    % collect dense SIFT features for faster feature extraction only 100
+    % features get extracted per image.
     step = floor(min(size(I))/10);
     [f, d] = vl_dsift(I, 'Step', step, 'Fast');
     
-    %optionally select only a random subset of features per image for the
-    %overall set (the function randsample might be helpful)
+    %Select only a random subset of features per image for the overall set
     chosen_random_features = randsample(size(d,2),num_features_per_image);
     
     % add the features of the current image to the feature space.
