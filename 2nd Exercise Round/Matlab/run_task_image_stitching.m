@@ -13,7 +13,7 @@ addpath('Material');
 ImageNames = {'Material/campus','Material/officeview'};
 ImageFileType = '.jpg';
 
-doPlot = true; % TODO for Report see images = true
+doPlot = false; % TODO for Report see images = true
 
 for imageName = ImageNames
     
@@ -92,52 +92,68 @@ for imageName = ImageNames
     TransfImages = cell(1, 5);
     
     [TransfImages{1}] = imtransform(Images{1}, H_1_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(TransfImages{1});
+    %figure, imshow(TransfImages{1});
 
     [TransfImages{2}] = imtransform(Images{2}, H_2_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(TransfImages{2});
+    %figure, imshow(TransfImages{2});
 
     [TransfImages{3}] = imtransform(Images{3}, H_3_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(TransfImages{3});
+    %figure, imshow(TransfImages{3});
 
     [TransfImages{4}] = imtransform(Images{4}, H_4_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(TransfImages{4});
+    %figure, imshow(TransfImages{4});
 
     [TransfImages{5}] = imtransform(Images{5}, H_5_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
-    figure, imshow(TransfImages{5});
+    %figure, imshow(TransfImages{5});
 
     %% 5. Blend overlapping color values in a way to avoid seams. Method called feathering
-    % ---- delete me -----
-    f = TransfImages{1};
-    for i = 2:5
-        f = f + TransfImages{i};
-    end
-    figure, imshow(f);
-    % ---- delete me end -
     
     bw = zeros(size(TransfImages{1})); 
-    middle = round(size(TransfImages{1})/2);
-    bw(middle(1),middle(2)) = 1; 
-    interpolationFactor = uint8(bwdist(bw,'euclidean'));
+    s  = size(bw);
+    % Setting 4 Corners:
+    bw(1,1)       = 1; 
+    bw(s(1),1)    = 1; 
+    bw(1,s(2))    = 1; 
+    bw(s(1),s(2)) = 1; 
+    interpolationFactor = bwdist(bw,'euclidean');
+    % Setting Interpolation between 0 and 1
+    interpolationFactor = mat2gray(interpolationFactor); % interpolationFactor / max(max(interpolationFactor));
     
-        
-    zaehler = uint8(zeros(size(TransfImages{1})));
+    % feathering Formel
+    zaehler = zeros(size(TransfImages{1}));
+    nenner  = zeros(size(TransfImages{1}));       
     for i=1:5
-        notBlack = uint8( (TransfImages{i}==0) ==0);
-        zaehler = zaehler + notBlack .* interpolationFactor;
+        zaehler  = zaehler + ((im2double(TransfImages{i})>0)==1) .* interpolationFactor;
+        nenner   = nenner  + im2double(TransfImages{i})          .* interpolationFactor;
     end
     
-    
-    rgb = TransfImages{1} .* interpolationFactor;
-    for i=2:5
-        rgb = rgb + TransfImages{i} .* interpolationFactor;
-    end
-            
     % Create Panorama Picture
-    panorama = uint8(zeros(size(TransfImages{1})));
-    panorama = rgb ./ zaehler;
+    panorama = nenner ./ zaehler;
     
-    figure, imshow(panorama);
+    figure, imshow(panorama), title('With blending');
+    
+    
+    %% Without blending ---- delete me -----
+%     f = zeros(size(TransfImages{1}));
+%     
+%     for k = 1:5
+%         image = im2double(TransfImages{k});
+%                  
+%         for i=1:size(TransfImages{1},1)
+%             for j=1:size(TransfImages{1},2)
+% 
+%                     if (image(i,j,1) == 0 & image(i,j,2) == 0 & image(i,j,3) == 0)
+%                         continue;
+%                     else
+%                         f(i,j,:) = image(i,j,:);
+%                     end
+% 
+%             end
+%         end
+%     end
+%     figure, imshow(f), title('Without blending');
+%     % ---- delete me end -
+    
 end
 
 end

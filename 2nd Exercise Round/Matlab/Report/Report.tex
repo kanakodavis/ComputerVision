@@ -1,3 +1,8 @@
+%
+% Computer Vision - WS2013
+% Abgabeprotokoll Exercise 2
+%
+%
 %{{{ misc
 \documentclass[subfigure,epsfig,fleqn,float,numbers=noenddot]{scrartcl}
 
@@ -6,13 +11,16 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{amsmath}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
 
 \usepackage{pgfplots}
 
 %Zitieren:
 \usepackage[english]{babel}
 %\usepackage[german]{babel}
-\usepackage{babelbib} % für das Erstellen des Bibtex-Literaturverzeichnisses
+\usepackage{babelbib} % fï¿½r das Erstellen des Bibtex-Literaturverzeichnisses
 \usepackage{cite}
 %\selectbiblanguage{english}
 %\selectbiblanguage{german}
@@ -21,12 +29,15 @@
 \usepackage{algpseudocode}
 \usepackage{algorithm}
 
+%For Quellcode
+\usepackage{listings}
+
 %Fancy shit
 \usepackage{url}
 
 \usepackage[pdftitle={Computer Vision - 2nd Exercise Round},
  						pdfauthor={Matthias Gusenbauer},
-						pdfauthor={Robin Melán},
+						pdfauthor={Robin MelÃ¡n},
 						pdfauthor={David Pfahler},
             pdfsubject={Computer Vision},
             pdfborder={0 0 0}]{hyperref}
@@ -74,7 +85,6 @@
 \makeatother
 \def\RR{\hbox{I\kern-.2em\hbox{R}}}
 
-
 \begin{document}
 
 %don't want date printed
@@ -91,7 +101,7 @@
 \author{~\\
   ~\\
   \fontsize{12}{12pt}
-  {\bf David Pfahler, Matthias Gusenbauer, Robin Melán}\\
+  {\bf David Pfahler, Matthias Gusenbauer, Robin MelÃ¡n}\\
   1126287, 1125577, 1029201
   ~\\ ~\\ ~\\
   \normalsize
@@ -110,12 +120,118 @@
 
 \subsection{SIFT Interest Point Detection}
 \label{sec:A}
+As the first part of the assignment we need to extract SIFT features out of every image separately.\footnote{See Matlab-file \emph{GetSIFTFeatures.m} } Therefore we convert the image to \emph{rgb2gray(image)} and method $[text{key, desc}] = vl\_sift(siftIm);$ to extract the features from our image. The \emph{key} value consists of a 4xn matrix, where n is the number of features found in the image, holding the x-coord., y-coord., the scale (s) factor and the orientation (in radiant). The $desc$ value holds an 128 dimensional vector for every $key$, which describe the eigenvectors (See Example in Figure \ref{img:sift}). 
+	\begin{figure}[H]
+		\includegraphics[width=0.55\textwidth]{./img/siftDesc2.jpg}
+		\caption{Extracted Sift Features}
+		\label{img:sift}
+	\end{figure}
 
 \subsection{Interest Point Matching and Image Registration}
 \label{sec:B}
+The next step consists of determining the homographies between all image pairs from left to right. So we start of with computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{5,4}$ (I switch 5 and 4 because I need to transform the 5th image into the 4th, if I am taking the image in the middle as reference, see further \ref{sec:C}).\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
+To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the euclidean distance between them.\\
+	\begin{figure}[H]
+		\includegraphics[width=0.85\textwidth]{./img/allMatches.jpg}
+		\caption{All the Matches that where found between the two Images, as we can see some of them are outliers - therefore we need the RANSAC scheme to get rid of them, so we don't get a distorted homography at the end.}
+		\label{img:outliers}
+	\end{figure}
+As we can see in Figure \ref{img:outliers} not all of our found matches are essentially correct, some of them are considered to be $outliers$ and if we would compute a homography including them we would get a distorted result. Therefore we apply the RANSAC scheme to receive a better estimation of the homography between the image pair.\footnote{See Matlab-file \emph{PerfRANSAC.m} } We begin by selecting randomly 4 matched-points pairwise (see Figure \ref{img:points} ) and estimate the homography between them $cp2tform(rndPnts1, rndPnts2, 'projective');$. 
+
+	\begin{figure}[H]
+		\includegraphics[width=0.55\textwidth]{./img/fourRandomMatches.jpg}
+		\caption{Select randomly 4 matched-points}
+		\label{img:points}
+	\end{figure}
+	
+[TODO better explaination here of code]
+\begin{lstlisting}
+T = 5;
+%b) estimate transformation ob rndPnts1 onto rndPnts2
+homography = cp2tform(rndPnts1, rndPnts2, 'projective');
+%c) transform the points 
+trnsfrmdPnts = tformfwd(homography, points1(:,1), points1(:,2));
+%d) calc euclidean distance
+distance = (trnsfrmdPnts - points2).^2; %one line sqrt(sum(.))
+distance = sqrt(distance(:, 1) + distance(:, 2));
+%do thresholding
+inliers = distance<=T;
+nrInliers = sum(inliers);
+\end{lstlisting}	
 
 \subsection{Image Stitching}
 \label{sec:C}
+So after we determined the homographies between all the image pairs we select the image in the middle (in our case Image 3) to be our reference image and compute all homographies that map the other images to our reference:
+\begin{equation*}
+\\H_{1,3} = H_{2,3} * H_{1,2}; \\
+H_{5,3} = H_{4,3} * H_{5,4}; 
+\end{equation*}
+Before we can stitch our images into one panorama picture we need to compute the size the output image is going to have. For this information we can take the method $imtransform$ with our new homographies and as a result we get the new size (xData, yData) of the transformed image, which is saved in our case for all 4 images (we don't need to compute the reference image, because we know it is going to be in the middle of the panorama picture) in an array: 
+\begin{lstlisting}
+	%% saves the dimensions of all the transformed images
+	xLim = zeros(4,2);
+	yLim = zeros(4,2);
+	
+	[transImage, xLim(1,:), yLim(1,:)] = imtransform(Images{1}, H_1_3);
+	...
+	
+	%% Getting the Coordinates for final Image
+	xMin = min(min(xLim));
+	xMax = max(max(xLim));
+    
+	yMin = min(min(yLim));
+	yMax = max(max(yLim));
+    
+	%% Width and Height of panorama image.
+	width  = round(xMax - xMin);	
+	height = round(yMax - yMin);
+\end{lstlisting}
+
+Now that we know the output dimensions of our final panorama image we can transform all of our images into that particular size by using again the $imtransform$ method but this time adding our appropriate dimensions [xMin xMax] and [yMin yMax] as our XData and YData parameters. Given all transformed images, the final step is to blend them together in a way to avoid seams. To do this we use an $\alpha$ channel where the value of $\alpha$ for an image is 0 at all border pixels and 1 at the maximum distance from the border. The remaining values are linearly interpolated (see Figure \ref{img:bwdist}). For Example our interpolation value $\alpha$ would look like Figure \ref{img:interpolation}. the final color at a pixel in the output image is computed as the $\alpha$-weighted sum of overlapping images. More precisely, if there are $n$ images overlapping at pixel position $(x,y), I_i(x,y), i = 1...n$ with color $(R_i,G_i,B_i)$ and weighting factors $\alpha_i$, the color values in the stitched output image O are computed as:
+\begin{equation*}
+	O(x,y) = \frac{\sideset{}{_{i=1}^n}\sum_{} (R_i,G_i,B_i) * \alpha_i} {\sideset{}{_{i=1}^n}\sum_{} \alpha_i}
+\end{equation*}
+This blending method is called $feathering$.
+	\begin{figure}[H]
+		\includegraphics[width=0.75\textwidth]{./img/bwdist.jpg}
+		\caption{To compute our $\alpha$ channel we used the method $bwdist$ with the euclidean distance method}
+		\label{img:bwdist}
+	\end{figure}
+	\begin{figure}[H]
+		\includegraphics[width=0.75\textwidth]{./img/interpolationFactor.jpg}
+		\caption{$\alpha$ channel for panorama picture}
+		\label{img:interpolation}
+	\end{figure}
+	
+\paragraph{Results}
+Our first set of images $campus1...5.jpg$ with $feathering$:
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withBlending.jpg}
+		\caption{}
+		\label{img:withBlend}
+\end{figure}
+And without $feathering$ (the transformed images are laid over each other from left to right):
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withoutBlending.jpg}
+		\caption{}
+		\label{img:withoutBlend}
+\end{figure} 
+Our second set of images $officeview1...5.jpg$ with $feathering$:
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withBlending2.jpg}
+		\caption{}
+		\label{img:withBlend2}
+\end{figure}
+And without $feathering$ (the transformed images are laid over each other from left to right):
+\begin{figure}[H]
+		\includegraphics[width=0.95\textwidth]{./img/withoutBlending2.jpg}
+		\caption{}
+		\label{img:withoutBlend2}
+\end{figure}
+
+Especially looking at the first image we see that some of the images could not be overlaid correctly, which means that there still were some small outliers which distorted the homography so that the final image is at some parts a little blurry. 
+With the second sample we detect the $feathering$ effect much better than for the first image because the shading through the image is continuous. 
+
 
 \section{Scene Recognition with Bag of Visual Words}
 \label{sec:2}
