@@ -31,7 +31,7 @@ function conf_matrix = ClassifyImages(test_set,C,training,group)
 
 test_group = cell2mat(test_set(:,2));
 test = zeros(size(test_set,1),size(C,2));
-step = 2; % or 1
+step = 1; % or 1
 I_id = 1;
 conf_matrix = zeros(size(unique(group),1));
 
