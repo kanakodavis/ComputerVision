@@ -256,14 +256,15 @@ width  = round(xMax - xMin);
 height = round(yMax - yMin);
 \end{lstlisting}
 
-Now that we know the output dimensions of our final panorama image we can transform all of our images into that particular size by using again the $imtransform$ method but this time adding our appropriate dimensions [xMin xMax] and [yMin yMax] as our XData and YData parameters. Given all transformed images, the final step is to blend them together in a way to avoid seams. To do this we use an $\alpha$ channel where the value of $\alpha$ for an image is 0 at all border pixels and 1 at the maximum distance from the border. The remaining values are linearly interpolated (see Figure \ref{img:bwdist}). For Example our interpolation value $\alpha$ would look like Figure \ref{img:interpolation}. the final color at a pixel in the output image is computed as the $\alpha$-weighted sum of overlapping images. More precisely, if there are $n$ images overlapping at pixel position $(x,y), I_i(x,y), i = 1...n$ with color $(R_i,G_i,B_i)$ and weighting factors $\alpha_i$, the color values in the stitched output image O are computed as:
+Now that we know the output dimensions of our final panorama image we can transform all of our images into that particular size by using again the $imtransform$ method but this time adding our appropriate dimensions [xMin xMax] and [yMin yMax] as our XData and YData parameters. Given all transformed images, the final step is to blend them together in a way to avoid seams. To do this we use an $\alpha$ channel where the value of $\alpha$ for an image is 0 at all border pixels and 1 at the maximum distance from the border. The remaining values are linearly interpolated (see Figure \ref{img:bwdist}) and transformed with their respective homography to the panoramic image. For Example our interpolation value $\alpha$ would look like Figure \ref{img:interpolation} for all our 5 images. The final color at a pixel in the output image is computed as the $\alpha$-weighted sum of overlapping images. More precisely, if there are $n$ images overlapping at pixel position $(x,y), I_i(x,y), i = 1...n$ with color $(R_i,G_i,B_i)$ and weighting factors $\alpha_i$, the color values in the stitched output image O are computed as follows:
 \begin{equation*}
 	O(x,y) = \frac{\sideset{}{_{i=1}^n}\sum_{} (R_i,G_i,B_i) * \alpha_i} {\sideset{}{_{i=1}^n}\sum_{} \alpha_i}
 \end{equation*}
+
 This blending method is called $feathering$.
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.75\textwidth]{./img/bwdist.jpg}
+		\includegraphics[width=0.65\textwidth]{./img/bwdist.jpg}
 		\caption{To compute our $\alpha$ channel we used the method $bwdist$ with the euclidean distance method}
 		\label{img:bwdist}
 	\end{figure}
@@ -279,33 +280,47 @@ Our first set of images $campus1...5.jpg$ with $feathering$:
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/withBlending.jpg}
-		\caption{}
+		\caption{Sample Set campus\{1...5\} with feathering}
 		\label{img:withBlend}
 \end{figure}
 And without $feathering$ (the transformed images are laid over each other from left to right):
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/withoutBlending.jpg}
-		\caption{}
+		\caption{Sample Set officeview\{1...5\} with feathering}
 		\label{img:withoutBlend}
 \end{figure} 
 Our second set of images $officeview1...5.jpg$ with $feathering$:
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/withBlending2.jpg}
-		\caption{}
+		\caption{Sample Set officeview\{1...5\} with feathering}
 		\label{img:withBlend2}
 \end{figure}
 And without $feathering$ (the transformed images are laid over each other from left to right):
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/withoutBlending2.jpg}
-		\caption{}
+		\caption{Sample Set campus\{1...5\} with feathering}
 		\label{img:withoutBlend2}
 \end{figure}
 
-Especially looking at the first image we see that some of the images could not be overlaid correctly, which means that there still were some small outliers which distorted the homography so that the final image is at some parts a little blurry. 
-With the second sample we detect the $feathering$ effect much better than for the first image because the shading through the image is continuous. 
+\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./img/soldier.jpg}
+		\caption{Sample Set campus\{1...5\} with feathering}
+		\label{img:own1}
+\end{figure}
+
+\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./img/charlie.jpg}
+		\caption{Sample Set campus\{1...5\} with feathering}
+		\label{img:own2}
+\end{figure}
+
+Especially looking at the first and the first self-made image (see Figure \ref{img:withBlend} \ref{img:own1}) we see that some of the images could not be overlaid correctly, which means that there still were some small outliers which distorted the homography so that the final image is at some parts a little blurry. 
+With the second sample and the self-made images (see Figure \ref{img:withBlend2} \ref{img:own1} \ref{img:own2}) we detect the $feathering$ effect much better than for the first image because the shading through the image is continuous and no seams are visible from overlapping one image after another. 
 
 
 \section{Scene Recognition with Bag of Visual Words}
