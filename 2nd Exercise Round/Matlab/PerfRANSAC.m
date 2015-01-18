@@ -1,4 +1,4 @@
-function [ homography ] = PerfRANSAC( points1, points2 ,image1, image2, doPlot)
+function [ homography, match1, match2 ] = PerfRANSAC( points1, points2 ,image1, image2, doPlot)
 %PerfRANSAC Performs RANSAC N times in order to find matching points and
 %correct homography
 %   Detailed explanation goes here
@@ -55,7 +55,10 @@ if (doPlot)
     match_plot(im2double(image1{1,1}), im2double(image2{1,1}), m1, m2);
     title('Matches of only Inliers!');
 end
+
 [~, ~, homography] = tformAInliers(points1, points2, m1, m2);
+match1 = m1;
+match2 = m2;
 
 end
 

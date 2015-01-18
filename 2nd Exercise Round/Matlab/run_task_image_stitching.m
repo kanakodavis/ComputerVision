@@ -105,6 +105,15 @@ for imageName = ImageNames
 
     [TransfImages{5}] = imtransform(Images{5}, H_5_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
     %figure, imshow(TransfImages{5});
+    
+    if(false)
+        diff = imabsdiff(TransfImages{1}, TransfImages{2});
+        diff = imabsdiff(diff, TransfImages{3});
+        diff = imabsdiff(diff, TransfImages{4});
+        diff = imabsdiff(diff, TransfImages{5});
+        figure; imshow(diff);
+        title('Absolute image differences.');
+    end
 
     %% 5. Blend overlapping color values in a way to avoid seams. Method called feathering
     
@@ -131,6 +140,8 @@ for imageName = ImageNames
     panorama = nenner ./ zaehler;
     
     figure, imshow(panorama), title('With blending');
+    
+    %TODO: do imrotate and imscale to test invariance of SIFT
     
     
     %% Without blending ---- delete me -----

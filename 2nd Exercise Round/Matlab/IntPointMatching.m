@@ -25,7 +25,12 @@ if (doPlot)
     title('All matches');
 end
 %Do RANSAC
-homography = PerfRANSAC(points1, points2, image1, image2, doPlot);
+[homography, match1, match2] = PerfRANSAC(points1, points2, image1, image2, doPlot);
+
+if(true)
+    match_plot(im2double(image1{1,1}), im2double(image2{1,1}), match1, match2);
+    title('RANSAC matches');
+end
 
 %5 Transform image
 % [transImage, xData, yData] = imtransform(image1{1,1}, homography);
