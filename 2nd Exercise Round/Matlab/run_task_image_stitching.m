@@ -1,4 +1,4 @@
-function run_task_image_stitching()
+function run_task_image_stitching(doRS)
 %run_task_image_stitching Performing image stitching on given images
 
 %Check if VL toolbox is installed and install if not
@@ -27,24 +27,44 @@ for imageName = ImageNames
     
     %Part A
     SIFTDat = cell(5, 3);
+    rsSIFTDat = cell(5, 3);
     for i=1:size(Images,2)
-        [key, feat] = GetSIFTFeatures(Images{i}, doPlot); 
+        [key, feat] = GetSIFTFeatures(Images{i}, doPlot);
         SIFTDat{i, 1} = Images{i};
         SIFTDat{i, 2} = key;
         SIFTDat{i, 3} = feat;
+        
+        if(doRS)
+            rsSIFTDat{i, 1} = imrotate(imresize(Images{i}, .8), 180);
+            [rskey, rsfeat] = GetSIFTFeatures(rsSIFTDat{i, 1}, doPlot);
+            rsSIFTDat{i, 2} = rskey;
+            rsSIFTDat{i, 3} = rsfeat;
+        end
     end
     
     %% C1 - Determine the homographies between all image pairs from left to
     % right. e.g. imagePairs{1,2} represents Homography H(1-2)
     imageTransformation = cell(4,4);
+    
+    if(doRS)
     % H(1-2)
-    H_1_2 = IntPointMatching(SIFTDat(1, :), SIFTDat(2, :), doPlot);
-    % H(2-3)
-    H_2_3 = IntPointMatching(SIFTDat(2, :), SIFTDat(3, :), doPlot);
-    % H(4-3)
-    H_4_3 = IntPointMatching(SIFTDat(4, :), SIFTDat(3, :), doPlot);
-    % H(5-4)
-    H_5_4 = IntPointMatching(SIFTDat(5, :), SIFTDat(4, :), doPlot);
+        H_1_2 = IntPointMatching(SIFTDat(1, :), rsSIFTDat(2, :), doPlot);
+        % H(2-3)
+        H_2_3 = IntPointMatching(SIFTDat(2, :), rsSIFTDat(3, :), doPlot);
+        % H(4-3)
+        H_4_3 = IntPointMatching(SIFTDat(4, :), rsSIFTDat(3, :), doPlot);
+        % H(5-4)
+        H_5_4 = IntPointMatching(SIFTDat(5, :), rsSIFTDat(4, :), doPlot);
+    else
+        % H(1-2)
+        H_1_2 = IntPointMatching(SIFTDat(1, :), SIFTDat(2, :), doPlot);
+        % H(2-3)
+        H_2_3 = IntPointMatching(SIFTDat(2, :), SIFTDat(3, :), doPlot);
+        % H(4-3)
+        H_4_3 = IntPointMatching(SIFTDat(4, :), SIFTDat(3, :), doPlot);
+        % H(5-4)
+        H_5_4 = IntPointMatching(SIFTDat(5, :), SIFTDat(4, :), doPlot);
+    end
         
     % if needed
     H_3_3 = maketform('affine',[1 0 0 ; 0 1 0; 0 0 1]);
@@ -141,7 +161,7 @@ for imageName = ImageNames
     
     figure, imshow(panorama), title('With blending');
     
-    %TODO: do imrotate and imscale to test invariance of SIFT
+    %TODO: fix rotation and scale before combining
     
     
     %% Without blending ---- delete me -----
