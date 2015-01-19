@@ -264,7 +264,7 @@ Now that we know the output dimensions of our final panorama image we can transf
 This blending method is called $feathering$.
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.65\textwidth]{./img/bwdist.jpg}
+		\includegraphics[width=0.65\textwidth]{./img/bwdist.pdf}
 		\caption{To compute our $\alpha$ channel we used the method $bwdist$ with the euclidean distance method}
 		\label{img:bwdist}
 	\end{figure}
@@ -287,7 +287,7 @@ And without $feathering$ (the transformed images are laid over each other from l
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/withoutBlending.jpg}
-		\caption{Sample Set officeview\{1...5\} with feathering}
+		\caption{Sample Set campus\{1...5\} without feathering}
 		\label{img:withoutBlend}
 \end{figure} 
 Our second set of images $officeview1...5.jpg$ with $feathering$:
@@ -301,21 +301,21 @@ And without $feathering$ (the transformed images are laid over each other from l
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/withoutBlending2.jpg}
-		\caption{Sample Set campus\{1...5\} with feathering}
+		\caption{Sample Set officeview\{1...5\} without feathering}
 		\label{img:withoutBlend2}
 \end{figure}
 
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/soldier.jpg}
-		\caption{Sample Set campus\{1...5\} with feathering}
+		\caption{First Set of our pictures \{1...5\} with feathering}
 		\label{img:own1}
 \end{figure}
 
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/charlie.jpg}
-		\caption{Sample Set campus\{1...5\} with feathering}
+		\caption{Second Set of our pictures \{1...5\} with feathering}
 		\label{img:own2}
 \end{figure}
 
@@ -354,7 +354,13 @@ We
 \label{sec:owntestimages}
 Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 different categories and tried to categorized them with our scene recognizer. Figure~\ref{fig:conf_matrix_own} shows the results of the scene recognition. As you can see only the picture of the bedroom and of the forest could get recognized correctly, the other 3 images were recognized wrong as bedroom.\\ This is also consistent with the above findings.
 
-\paragraph{Step Size} we also tried to categorize the pictures with a step size of 1, which means the double amount of SIFT features per image. Figure~\ref{fig:stepsize} shows that the results were worse than with the step size of 2. 
+\paragraph{Parameters}
+
+\begin{itemize}
+	\item We tried to categorize the pictures with a \texttt{step size} of 1, which means the double amount of SIFT features per image. Figure~\ref{fig:stepsize} shows that the results were worse than with the step size of 2. 
+	\item We tried to change the \texttt{k} of the \texttt{knnclassify} method and we changed it from 3 to 8 which helped us to improve the results for the given training and test set for every category significantly except of the living room and the street category. (See Figure~\ref{fig:knn})
+	\item And we looked what happens if we enhance the size of the bag of words to 100 clusters instead of 50 with k=8 (see above) and the results were worse for the recognition of the bedroom, but much better for complicated structures that repeat itself very often like in the category for the store or the office. (See Figure~\ref{fig:cluster100}) By reducing the k back to 3 the classification results get slightly worse but the classification rate for the bedroom gets to 43\% which is the best result.
+\end{itemize} 
 
 \begin{figure}
         \centering
@@ -409,6 +415,20 @@ Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 di
 		\includegraphics[width=\textwidth]{img/conf_matrix_step1.pdf}
 		\caption{classification results in percentage of the given test set in form of a confusion matrix with step size = 1}
 		\label{fig:stepsize}
+\end{figure}
+
+\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{img/conf_matrix_k8.pdf}
+		\caption{classification results in percentage of the given test set in form of a confusion matrix with a knn classification of k = 8}
+		\label{fig:knn}
+\end{figure}
+
+\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{img/conf_matrix_k8_c100.pdf}
+		\caption{classification results in percentage of the given test set in form of a confusion matrix with a knn classification of k = 8 and 100 clusters}
+		\label{fig:cluster100}
 \end{figure}
 
 \begin{figure}%

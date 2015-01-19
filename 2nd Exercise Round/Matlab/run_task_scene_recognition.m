@@ -35,9 +35,8 @@ conf_matrix_own = ClassifyImages(own_set,C,training,group);
 
 %% Step 4: Visualize the results
 
-VisualizeConfMatrix(conf_matrix_test,group,category_names_test)
-VisualizeConfMatrix(conf_matrix_own,group,category_names_own)
-
+VisualizeConfMatrix(conf_matrix_test,group,category_names_test);
+VisualizeConfMatrix(conf_matrix_own,group,category_names_own);
 
 end
 

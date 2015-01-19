@@ -33,7 +33,7 @@ function [training, group] = BuildKNN(training_set,C)
 
     group = cell2mat(training_set(:,2));
     training = zeros(size(training_set,1),size(C,2));
-    step = 1; % or 1
+    step = 2; % or 1
     I_id = 1;
     %% Get the SIFT features for every image but more densely
     for c_I = training_set(:,1)'
