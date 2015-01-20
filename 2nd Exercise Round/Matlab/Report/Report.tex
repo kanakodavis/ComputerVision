@@ -131,19 +131,25 @@ As the first part of the assignment we need to extract SIFT features out of ever
 \subsection{Interest Point Matching and Image Registration}
 \label{sec:B}
 The next step consists of determining the homographies between all image pairs from left to right. So we start of with computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{5,4}$ (I switch 5 and 4 because I need to transform the 5th image into the 4th, if I am taking the image in the middle as reference, see further \ref{sec:C}).\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
-To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the euclidean distance between them.\\
+To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the squared euclidean distance between them.  $vl_ubcmatch(DESCR1, DESCR2)$ uses a threshold $THRESH$ (the default value of $THRESH$ is 1.5), which means that a descriptor $D1$ is matched to a descriptor $D2$ only if the distance $d(D1,D2)$ multiplied by THRESH is not greater than the distance of $D1$ to all other descriptors.\\
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.85\textwidth]{./img/allMatches.jpg}
 		\caption{All the Matches that where found between the two Images, as we can see some of them are outliers - therefore we need the RANSAC scheme to get rid of them, so we don't get a distorted homography at the end.}
 		\label{img:outliers}
 	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./img/ransacMatches.jpg}
+		\caption{All with RANSAC method extracted inlier Matches from Figure \ref{img:outliers}}
+		\label{img:inliers}
+	\end{figure}
 As we can see in Figure \ref{img:outliers} not all of our found matches are essentially correct, some of them are considered to be $outliers$ and if we would compute a homography including them we would get a distorted result. Therefore we apply the RANSAC scheme to receive a better estimation of the homography between the image pair.\footnote{See Matlab-file \emph{PerfRANSAC.m} } 
 \par We begin by selecting randomly 4 matched-points pairwise (see Figure \ref{img:points} ) and estimate the homography between them by using the given function $cp2tform()$ as follows.
 \begin{lstlisting}
-$[homography] = cp2tform(rndPnts1, rndPnts2, 'projective')$. 
+[homography] = cp2tform(rndPnts1, rndPnts2, 'projective') 
 \end{lstlisting}
-After acquiring the homography we transform all found points of interest and measure how many points are below a given threshold distance $T$ using the euclidean distance as distance metric. This is done in the function tformAInliers() in starting at line 55 in the code below. If the number of inliers in the current iteration of the algorithm is greater than the previous best result then the best homography gets updated to the current one. After $N$ iterations the inliers of the best matching homography are used to reestimate the homography which is then used to transform the image in step $C)$. 
+After acquiring the homography we transform all found points of interest and measure how many points are below a given threshold distance $T$ using the euclidean distance as distance metric. This is done in the function tformAInliers() in starting at line 55 in the code below. If the number of inliers in the current iteration of the algorithm is greater than the previous best result then the best homography gets updated to the current one. After $N$ iterations the inliers of the best matching homography are used to reestimate the homography (see Figure \ref{img:inliers} ) which is then used to transform the image in step $C)$. 
 
 \begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny]
 function [ homography ] = PerfRANSAC( points1, points2 ,image1, image2, doPlot)
