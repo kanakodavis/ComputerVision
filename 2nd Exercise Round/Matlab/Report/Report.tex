@@ -120,7 +120,7 @@
 
 \subsection{SIFT Interest Point Detection}
 \label{sec:A}
-As the first part of the assignment we need to extract SIFT features out of every image separately.\footnote{See Matlab-file \emph{GetSIFTFeatures.m} } Therefore we convert the image to \emph{rgb2gray(image)} and method $[text{key, desc}] = vl\_sift(siftIm);$ to extract the features from our image. The \emph{key} value consists of a 4 x n matrix, where n is the number of features found in the image, holding the x-coord., y-coord., the scale (s) factor and the orientation (in radiant). The $desc$ value holds an 128 dimensional vector for every $key$, which describe the eigenvectors (See Example in Figure \ref{img:sift}). 
+As the first part of the assignment we need to extract SIFT features out of every image separately.\footnote{See Matlab-file \emph{GetSIFTFeatures.m} } Therefore we convert the image to \emph{rgb2gray(image)} and use the method $[text{key, desc}] = vl\_sift(siftIm);$ to extract the features from our image. The \emph{key} value consists of a 4 x n matrix, where n is the number of features found in the image, holding the x-coord., y-coord., the scale (s; seen as radius of the yellow circle in the plot) factor and the orientation (in radiant; seen as the orientation in the plot). The $desc$ value holds an 128 dimensional vector for every $key$, which describe the eigenvectors (See Example in Figure \ref{img:sift}). 
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.55\textwidth]{./img/siftDesc2.jpg}
@@ -131,7 +131,7 @@ As the first part of the assignment we need to extract SIFT features out of ever
 \subsection{Interest Point Matching and Image Registration}
 \label{sec:B}
 The next step consists of determining the homographies between all image pairs from left to right. So we start of with computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{5,4}$ (I switch 5 and 4 because I need to transform the 5th image into the 4th, if I am taking the image in the middle as reference, see further \ref{sec:C}).\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
-To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the squared euclidean distance between them.  $vl_ubcmatch(DESCR1, DESCR2)$ uses a threshold $THRESH$ (the default value of $THRESH$ is 1.5), which means that a descriptor $D1$ is matched to a descriptor $D2$ only if the distance $d(D1,D2)$ multiplied by THRESH is not greater than the distance of $D1$ to all other descriptors.\\
+To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the squared euclidean distance between them.  $vl\_ubcmatch(DESCR1, DESCR2)$ uses a threshold $THRESH$ (the default value of $THRESH$ is 1.5), which means that a descriptor $D1$ is matched to a descriptor $D2$ only if the distance $d(D1,D2)$ multiplied by THRESH is not greater than the distance of $D1$ to all other descriptors.\\
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.85\textwidth]{./img/allMatches.jpg}
@@ -149,9 +149,36 @@ As we can see in Figure \ref{img:outliers} not all of our found matches are esse
 \begin{lstlisting}
 [homography] = cp2tform(rndPnts1, rndPnts2, 'projective') 
 \end{lstlisting}
-After acquiring the homography we transform all found points of interest and measure how many points are below a given threshold distance $T$ using the euclidean distance as distance metric. This is done in the function tformAInliers() in starting at line 55 in the code below. If the number of inliers in the current iteration of the algorithm is greater than the previous best result then the best homography gets updated to the current one. After $N$ iterations the inliers of the best matching homography are used to reestimate the homography (see Figure \ref{img:inliers} ) which is then used to transform the image in step $C)$. 
+After acquiring the homography we transform all found points of interest and measure how many points are below a given threshold distance $T$ using the euclidean distance as distance metric. This is done in the function tformAInliers(). 
+\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny, breaklines=true]
+function [ nrInliers, inliers, homography ] = tformAInliers( points1,points2, rndPnts1, rndPnts2)
 
-\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny]
+T = 5;
+
+% b) estimate transformation ob rndPnts1 onto rndPnts2
+homography = cp2tform(rndPnts1, rndPnts2, 'projective');
+
+% c) transform the points 
+trnsfrmdPnts = tformfwd(homography, points1(:,1), points1(:,2));
+
+% d) calc euclidean distance
+distance = (trnsfrmdPnts - points2).^2; %one line sqrt(sum(.))
+distance = sqrt(distance(:, 1) + distance(:, 2));
+
+% Thresholding
+inliers = distance<=T;
+nrInliers = sum(inliers);
+
+end
+\end{lstlisting}
+
+\hspace{5mm}
+
+If the number of inliers in the current iteration of the algorithm is greater than the previous best result then the best homography gets updated to the current one. 
+
+\hspace{0.5mm}
+
+\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny, breaklines=true]
 function [ homography ] = PerfRANSAC( points1, points2 ,image1, image2, doPlot)
 
 N = 1000;
@@ -183,6 +210,15 @@ for(i=1:N)
     end
 end
 
+\end{lstlisting}
+
+\hspace{5mm}
+
+After $N$ iterations the inliers of the best matching homography are used to reestimate the homography (see Figure \ref{img:inliers} ) which is then used to transform the image in step $C)$. 
+
+\hspace{0.5mm}
+
+\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny, breaklines=true]
 % 4) after N runs take best homography and reestimate with all points
 % saving only the inliners from points1 and 2
 m1 = zeros(bestInliersCnt,2);
@@ -205,26 +241,6 @@ end
 [~, ~, homography] = tformAInliers(points1, points2, m1, m2);
 
 end
-
-function [ nrInliers, inliers, homography ] = tformAInliers( points1, points2, rndPnts1, rndPnts2)
-
-T = 5;
-
-% b) estimate transformation ob rndPnts1 onto rndPnts2
-homography = cp2tform(rndPnts1, rndPnts2, 'projective');
-
-% c) transform the points 
-trnsfrmdPnts = tformfwd(homography, points1(:,1), points1(:,2));
-
-% d) calc euclidean distance
-distance = (trnsfrmdPnts - points2).^2; %one line sqrt(sum(.))
-distance = sqrt(distance(:, 1) + distance(:, 2));
-
-% Thresholding
-inliers = distance<=T;
-nrInliers = sum(inliers);
-
-end
 \end{lstlisting}
 
 	\begin{figure}[H]
@@ -233,6 +249,23 @@ end
 		\caption{Select randomly 4 matched-points}
 		\label{img:points}
 	\end{figure}
+
+After performing RANSAC to remove outliers and transforming the image the results are still not perfect. By showing the absolute difference of the transformed image and another aligned image some errors of the algorithm can be seen.
+\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.65\textwidth]{./img/RANSACImDiffDetail.jpg}
+		\caption{Absolute difference between two image. Seen as the part that looks like false colors inbetween the two images.}
+		\label{img:absdiffdet}
+\end{figure}
+
+This artefacts occur for all alignments as can be seen in the following figure.
+
+\begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{./img/RANSACImDiffTotal.jpg}
+		\caption{Absolute difference of all panorama images. Seen as the part that looks like false colors inbetween two consecutive images.}
+		\label{img:absdifftot}
+\end{figure}
 
 \subsection{Image Stitching}
 \label{sec:C}
@@ -325,8 +358,8 @@ And without $feathering$ (the transformed images are laid over each other from l
 		\label{img:own2}
 \end{figure}
 
-Especially looking at the first and the first self-made image (see Figure \ref{img:withBlend} \ref{img:own1}) we see that some of the images could not be overlaid correctly, which means that there still were some small outliers which distorted the homography so that the final image is at some parts a little blurry. 
-With the second sample and the self-made images (see Figure \ref{img:withBlend2} \ref{img:own1} \ref{img:own2}) we detect the $feathering$ effect much better than for the first image because the shading through the image is continuous and no seams are visible from overlapping one image after another. 
+Especially looking at the first and the first self-made image (see Figure \ref{img:withBlend}, \ref{img:own1}) we see that some of the images could not be overlaid correctly, which means that there still were some small outliers which distorted the homography so that the final image is at some parts a little blurry. 
+With the second sample and the self-made images (see Figure \ref{img:withBlend2}, \ref{img:own1}, \ref{img:own2}) we detect the $feathering$ effect much better than for the first image because the shading through the image is continuous and no seams are visible from overlapping one image after another. 
 
 
 \section{Scene Recognition with Bag of Visual Words}
