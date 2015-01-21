@@ -30,14 +30,15 @@
 \usepackage{algorithm}
 
 %For Sourcecode
-\usepackage[numbered,framed]{matlab-prettifier}
+\usepackage{listings}
+%\usepackage[numbered,framed]{matlab-prettifier}
 
-\lstset{
-  style              = Matlab-editor,
-  basicstyle         = \mlttfamily,
-  escapechar         = ",
-  mlshowsectionrules = true,
-}
+%\lstset{
+%  style              = Matlab-editor,
+%  basicstyle         = \mlttfamily,
+%  escapechar         = ",
+%  mlshowsectionrules = true,
+%}
 
 %Fancy shit
 \usepackage{url}
@@ -151,7 +152,15 @@ To compute the homography we first need to follow a couple of steps, starting by
 		\caption{All with RANSAC method extracted inlier Matches from Figure \ref{img:outliers}}
 		\label{img:inliers}
 	\end{figure}
-As we can see in Figure \ref{img:outliers} not all of our found matches are essentially correct, some of them are considered to be $outliers$ and if we would compute a homography including them we would get a distorted result. Therefore we apply the RANSAC scheme to receive a better estimation of the homography between the image pair.\footnote{See Matlab-file \emph{PerfRANSAC.m} } 
+As we can see in Figure \ref{img:outliers} not all of our found matches are essentially correct, some of them are considered to be $outliers$ and if we would compute a homography including them we would get a distorted result. Therefore we apply the RANSAC scheme to receive a better estimation of the homography between the image pair.\footnote{See Matlab-file \emph{PerfRANSAC.m} } \\
+As we can see in Figure \ref{img:invariant} these sift features are scale and rotation invariant and applying the RANSAC method on all those matches we can filter out the outliers correctly.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./img/siftinvariant.png}
+		\caption{Show that Sift Features are invariant to rotation and scaling}
+		\label{img:invariant}
+	\end{figure}
+	
 \par We begin by selecting randomly 4 matched-points pairwise (see Figure \ref{img:points} ) and estimate the homography between them by using the given function $cp2tform()$ as follows.
 \begin{lstlisting}
 [homography] = cp2tform(rndPnts1, rndPnts2, 'projective') 
