@@ -31,7 +31,8 @@ function conf_matrix = ClassifyImages(test_set,C,training,group)
 
 test_group = cell2mat(test_set(:,2));
 test = zeros(size(test_set,1),size(C,2));
-step = 1; % or 1
+step = 2; % or 1
+k = 3; % or 3
 I_id = 1;
 conf_matrix = zeros(size(unique(group),1));
 
@@ -48,7 +49,7 @@ end
 
 %% Actual classification
 
-class = knnclassify(test,training,group,3);
+class = knnclassify(test,training,group,k);
 
 %% Build the conf_matrix
 for i = unique(group)'

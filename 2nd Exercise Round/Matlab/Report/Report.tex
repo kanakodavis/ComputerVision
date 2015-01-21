@@ -30,7 +30,14 @@
 \usepackage{algorithm}
 
 %For Sourcecode
-\usepackage{listings}
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\lstset{
+  style              = Matlab-editor,
+  basicstyle         = \mlttfamily,
+  escapechar         = ",
+  mlshowsectionrules = true,
+}
 
 %Fancy shit
 \usepackage{url}
@@ -150,7 +157,7 @@ As we can see in Figure \ref{img:outliers} not all of our found matches are esse
 [homography] = cp2tform(rndPnts1, rndPnts2, 'projective') 
 \end{lstlisting}
 After acquiring the homography we transform all found points of interest and measure how many points are below a given threshold distance $T$ using the euclidean distance as distance metric. This is done in the function tformAInliers(). 
-\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny, breaklines=true]
+\begin{lstlisting}
 function [ nrInliers, inliers, homography ] = tformAInliers( points1,points2, rndPnts1, rndPnts2)
 
 T = 5;
@@ -178,7 +185,7 @@ If the number of inliers in the current iteration of the algorithm is greater th
 
 \hspace{0.5mm}
 
-\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny, breaklines=true]
+\begin{lstlisting}
 function [ homography ] = PerfRANSAC( points1, points2 ,image1, image2, doPlot)
 
 N = 1000;
@@ -218,7 +225,7 @@ After $N$ iterations the inliers of the best matching homography are used to ree
 
 \hspace{0.5mm}
 
-\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny, breaklines=true]
+\begin{lstlisting}
 % 4) after N runs take best homography and reestimate with all points
 % saving only the inliners from points1 and 2
 m1 = zeros(bestInliersCnt,2);
@@ -275,7 +282,7 @@ So after we determined the homographies between all the image pairs we select th
 H_{5,3} = H_{4,3} * H_{5,4} 
 \end{equation*}
 Before we can stitch our images into one panorama picture we need to compute the size the output image is going to have. For this information we can take the method $imtransform$ with our new homographies and as a result we get the new size (xData, yData) of the transformed image, which is saved in our case for all 4 images (we don't need to compute the reference image, because we know it is going to be in the middle of the panorama picture) in an array: 
-\begin{lstlisting}[language=Matlab, numbers=left, numberstyle=\tiny]
+\begin{lstlisting}
 %% saves the dimensions of all the transformed images
 xLim = zeros(4,2);
 yLim = zeros(4,2);
@@ -387,7 +394,6 @@ Figure~\ref{fig:conf_matrix_test} shows the classification results of the given 
 In general our scene classification results are all higher than 35\% which is really bad. But this is only the case because pictures of bedrooms and living rooms are very similar and it is really hard to distinguish them. Figure~\ref{fig:hardimages} shows two pictures (one living room and one bedroom) which contain many similarities. For example both rooms contain: Lamps, a television, a bed/ a sofa, windows and other furniture.\\
 Also pictures of kitchens got confused as livingrooms (16\%) and offices (13\%). And stores got wrongly detected as livingrooms (21\%) and streets (9\%).
 Figure~\ref{fig:easyimages} shows that in contrast it is very easy to distinguish between a living room and a forest or a mountain, because nearly no features appear in both images. Only through the windows of the rooms or pictures on the walls it is possible to see nature in human environments. This is also reflected in the classification rate of the forest images which is at 92\%.
-We
 
 \paragraph{Own Test Images}
 \label{sec:owntestimages}
@@ -438,13 +444,13 @@ Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 di
 \begin{figure}
 		\centering
 		\includegraphics[width=\textwidth]{img/conf_matrix_own.pdf}
-		\caption{classification results in percentage of the own pictures in form of a confusion matrix}
+		\caption{Classification results in percentage of the own pictures in form of a confusion matrix}
 		\label{fig:conf_matrix_own}
 \end{figure}
 \begin{figure}
 		\centering
 		\includegraphics[width=\textwidth]{img/conf_matrix_test.pdf}
-		\caption{classification results in percentage of the given test set in form of a confusion matrix}
+		\caption{Classification results in percentage of the given test set in form of a confusion matrix}
 		\label{fig:conf_matrix_test}
 \end{figure}
 
@@ -452,21 +458,21 @@ Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 di
 \begin{figure}
 		\centering
 		\includegraphics[width=\textwidth]{img/conf_matrix_step1.pdf}
-		\caption{classification results in percentage of the given test set in form of a confusion matrix with step size = 1}
+		\caption{Classification results in percentage of the given test set in form of a confusion matrix with step size = 1}
 		\label{fig:stepsize}
 \end{figure}
 
 \begin{figure}
 		\centering
 		\includegraphics[width=\textwidth]{img/conf_matrix_k8.pdf}
-		\caption{classification results in percentage of the given test set in form of a confusion matrix with a knn classification of k = 8}
+		\caption{Classification results in percentage of the given test set in form of a confusion matrix with a knn classification of k = 8}
 		\label{fig:knn}
 \end{figure}
 
 \begin{figure}
 		\centering
 		\includegraphics[width=\textwidth]{img/conf_matrix_k8_c100.pdf}
-		\caption{classification results in percentage of the given test set in form of a confusion matrix with a knn classification of k = 8 and 100 clusters}
+		\caption{Classification results in percentage of the given test set in form of a confusion matrix with a knn classification of k = 8 and 100 clusters}
 		\label{fig:cluster100}
 \end{figure}
 
