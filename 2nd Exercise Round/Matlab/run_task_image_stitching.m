@@ -1,4 +1,4 @@
-function run_task_image_stitching(doRS)
+function run_task_image_stitching()
 %run_task_image_stitching Performing image stitching on given images
 
 %Check if VL toolbox is installed and install if not
@@ -13,6 +13,13 @@ addpath('Material');
 ImageNames = {'Material/campus','Material/officeview'};
 ImageFileType = '.jpg';
 
+ImageNamesOwn = {'Material/stitching/soldier','Material/stitching/charlie'};
+ImageFileType = '.jpg';
+
+ImageNamesRotation = {'Material/rotation/campus','Material/rotation/officeview'};
+ImageFileType = '.jpg';
+
+doRS = false;
 doPlot = true; % TODO for Report see images = true
 
 for imageName = ImageNames

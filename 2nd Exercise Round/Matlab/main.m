@@ -9,7 +9,7 @@ end
 
 addpath('Material');
 
-run_task_image_stitching(false);
+run_task_image_stitching();
 %run_task_image_stitching(true);
 run_task_scene_recognition();
 
