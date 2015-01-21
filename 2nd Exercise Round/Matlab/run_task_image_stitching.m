@@ -13,7 +13,7 @@ addpath('Material');
 ImageNames = {'Material/campus','Material/officeview'};
 ImageFileType = '.jpg';
 
-doPlot = false; % TODO for Report see images = true
+doPlot = true; % TODO for Report see images = true
 
 for imageName = ImageNames
     
@@ -136,32 +136,42 @@ for imageName = ImageNames
     end
 
     %% 5. Blend overlapping color values in a way to avoid seams. Method called feathering
+    interpolationF = cell(1, 5);
     
-    bw = zeros(size(TransfImages{1})); 
+    bw = zeros(size(Images{i})); 
     s  = size(bw);
     % Setting 4 Corners:
     bw(1,1)       = 1; 
-    bw(s(1),1)    = 1; 
     bw(1,s(2))    = 1; 
+    bw(s(1),1)    = 1; 
     bw(s(1),s(2)) = 1; 
-    interpolationFactor = bwdist(bw,'euclidean');
     % Setting Interpolation between 0 and 1
-    interpolationFactor = mat2gray(interpolationFactor); % interpolationFactor / max(max(interpolationFactor));
+    interpImage = mat2gray(bwdist(bw,'euclidean'));
+    
+    % Transforming the interpolation as well with homographies
+    interpolationF{1} = imtransform(interpImage, H_1_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    %figure, imshow(interpolationF{1});
+    interpolationF{2} = imtransform(interpImage, H_2_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    %figure, imshow(interpolationF{2});
+    interpolationF{3} = imtransform(interpImage, H_3_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    %figure, imshow(interpolationF{3});
+    interpolationF{4} = imtransform(interpImage, H_4_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    %figure, imshow(interpolationF{4});
+    interpolationF{5} = imtransform(interpImage, H_5_3, 'XData', [xMin xMax], 'YData', [yMin yMax]);
+    %figure, imshow(interpolationF{5});
     
     % feathering Formel
     zaehler = zeros(size(TransfImages{1}));
     nenner  = zeros(size(TransfImages{1}));       
     for i=1:5
-        zaehler  = zaehler + ((im2double(TransfImages{i})>0)==1) .* interpolationFactor;
-        nenner   = nenner  + im2double(TransfImages{i})          .* interpolationFactor;
+        zaehler  = zaehler + ((im2double(TransfImages{i})>0)==1) .* interpolationF{i};
+        nenner   = nenner  + im2double(TransfImages{i})          .* interpolationF{i};
     end
     
     % Create Panorama Picture
     panorama = nenner ./ zaehler;
     
     figure, imshow(panorama), title('With blending');
-    
-    %TODO: fix rotation and scale before combining
     
     
     %% Without blending ---- delete me -----
