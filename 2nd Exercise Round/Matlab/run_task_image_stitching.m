@@ -104,11 +104,11 @@ for imageName = ImageNames
     [transImage, xLim(4,:), yLim(4,:)] = imtransform(Images{5}, H_5_3);
     %figure, imshow(transImage);
     
-    xMin = min(min(xLim));
-    xMax = max(max(xLim));
+    xMin = floor(min(min(xLim)));
+    xMax = ceil(max(max(xLim)));
     
-    yMin = min(min(yLim));
-    yMax = max(max(yLim));
+    yMin = floor(min(min(yLim)));
+    yMax = ceil(max(max(yLim)));
     
     % Width and height of panorama.
     width  = round(xMax - xMin);
@@ -148,10 +148,10 @@ for imageName = ImageNames
     bw = zeros(size(Images{i})); 
     s  = size(bw);
     % Setting 4 Corners:
-    bw(1,1)       = 1; 
-    bw(1,s(2))    = 1; 
-    bw(s(1),1)    = 1; 
-    bw(s(1),s(2)) = 1; 
+    bw(1,:)    = 1; 
+    bw(:,1)    = 1; 
+    bw(:,s(2)) = 1; 
+    bw(s(1),:) = 1; 
     % Setting Interpolation between 0 and 1
     interpImage = mat2gray(bwdist(bw,'euclidean'));
     
