@@ -138,7 +138,7 @@ As the first part of the assignment we need to extract SIFT features out of ever
 
 \subsection{Interest Point Matching and Image Registration}
 \label{sec:B}
-The next step consists of determining the homographies between all image pairs from left to right. So we start of with computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{5,4}$ (I switch 5 and 4 because I need to transform the 5th image into the 4th, if I am taking the image in the middle as reference, see further \ref{sec:C}).\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
+The next step consists of determining the homographies between all image pairs from left to right. So we start off by computing the first homography $H_\text{1,2}$ and continue until homography $H_\text{5,4}$ (I switch 5 and 4 because I need to transform the 5th image into the 4th, if I am taking the image in the middle as reference, see further \ref{sec:C}).\footnote{See Matlab-file \emph{IntPointMatching.m} } \\
 To compute the homography we first need to follow a couple of steps, starting by matching our descriptors $[matches, scores] = vl\_ubcmatch(descriptor1, descriptor2);$. $Matches$ contains the indices of the original (first) and closest descriptor in the other (second) image. The $scores$ value holds the squared euclidean distance between them.  $vl\_ubcmatch(DESCR1, DESCR2)$ uses a threshold $THRESH$ (the default value of $THRESH$ is 1.5), which means that a descriptor $D1$ is matched to a descriptor $D2$ only if the distance $d(D1,D2)$ multiplied by THRESH is not greater than the distance of $D1$ to all other descriptors.\\
 	\begin{figure}[H]
 		\centering
@@ -153,11 +153,11 @@ To compute the homography we first need to follow a couple of steps, starting by
 		\label{img:inliers}
 	\end{figure}
 As we can see in Figure \ref{img:outliers} not all of our found matches are essentially correct, some of them are considered to be $outliers$ and if we would compute a homography including them we would get a distorted result. Therefore we apply the RANSAC scheme to receive a better estimation of the homography between the image pair.\footnote{See Matlab-file \emph{PerfRANSAC.m} } \\
-As we can see in Figure \ref{img:invariant} these sift features are scale and rotation invariant and applying the RANSAC method on all those matches we can filter out the outliers correctly.
+As we can see in Figure \ref{img:invariant} these SIFT features are scale and rotation invariant and applying the RANSAC method on all those matches we can filter out the outliers correctly.
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{./img/siftinvariant.png}
-		\caption{Show that Sift Features are invariant to rotation and scaling}
+		\caption{Show that SIFT Features are invariant to rotation and scaling}
 		\label{img:invariant}
 	\end{figure}
 	
@@ -311,7 +311,7 @@ width  = round(xMax - xMin);
 height = round(yMax - yMin);
 \end{lstlisting}
 
-Now that we know the output dimensions of our final panorama image we can transform all of our images into that particular size by using again the $imtransform$ method but this time adding our appropriate dimensions [xMin xMax] and [yMin yMax] as our XData and YData parameters. Given all transformed images, the final step is to blend them together in a way to avoid seams. To do this we use an $\alpha$ channel where the value of $\alpha$ for an image is 0 at all border pixels and 1 at the maximum distance from the border. The remaining values are linearly interpolated (see Figure \ref{img:bwdist}) and transformed with their respective homography to the panoramic image. For Example our interpolation value $\alpha$ would look like Figure \ref{img:interpolation} for all our 5 images. The final color at a pixel in the output image is computed as the $\alpha$-weighted sum of overlapping images. More precisely, if there are $n$ images overlapping at pixel position $(x,y), I_i(x,y), i = 1...n$ with color $(R_i,G_i,B_i)$ and weighting factors $\alpha_i$, the color values in the stitched output image O are computed as follows:
+Now that we know the output dimensions of our final panorama image we can transform all of our images into that particular size by using again the $imtransform$ method but this time adding our appropriate dimensions [xMin xMax] and [yMin yMax] as our XData and YData parameters. Given all transformed images, the final step is to blend them together in a way to avoid seams. To do this we use an $\alpha$ channel where the value of $\alpha$ for an image is 0 at all border pixels and 1 at the maximum distance from the border. The remaining values are linearly interpolated (see Figure \ref{img:bwdist}) and transformed with their respective homography to the panoramic image. For example our interpolation value $\alpha$ would look like Figure \ref{img:interpolation} for all our 5 images. The final color at a pixel in the output image is computed as the $\alpha$-weighted sum of overlapping images. More precisely, if there are $n$ images overlapping at pixel position $(x,y), I_i(x,y), i = 1...n$ with color $(R_i,G_i,B_i)$ and weighting factors $\alpha_i$, the color values in the stitched output image O are computed as follows:
 \begin{equation*}
 	O(x,y) = \frac{\sideset{}{_{i=1}^n}\sum_{} (R_i,G_i,B_i) * \alpha_i} {\sideset{}{_{i=1}^n}\sum_{} \alpha_i}
 \end{equation*}
@@ -388,11 +388,11 @@ We use the standard bag of visual words model to achieve this task. Subsection~\
 \label{sec:methodology}
 
 First the test- and the training-set gets loaded and for every image its category is saved. The next step is to build a vocabulary
-of visual words. We will form this vocabulary by sampling many local features from our training set and then clustering them with K-means. The number of K-means clusters \texttt{num\_clusters} is the size of our vocabulary. We used 50 clusters which means that the 128 dimensional SIFT feature space is partitioned into 50 regions.\\
+of visual words. We will form this vocabulary by sampling many local features from our training set and then clustering them with k-means. The number of k-means clusters \texttt{num\_clusters} is the size of our vocabulary. We used 50 clusters which means that the 128 dimensional SIFT feature space is partitioned into 50 regions.\\
 Every time a new SIFT feature gets observed, the cluster it belongs to can easily get figured out by getting the nearest centroid of our original clusters. Those clusters are our visual word vocabulary.\\
-To extract these SIFT features from the images in the training set to collect them for k-means clustering, 100 SIFT features get extracted from every image. These features get added to the feature space which is $128 \times \mbox{size of training set}*\mbox{number of features per image}$. In out example the training set contains 800 images and the number of features per image is also 100, that means the feature space is $128 \times 80000$ big. After that the 50 clusters get determined and stored in a matrix.\\
-The next step is to build a feature representation for every image in the training set that can be used for the classification of new images later on. An image is represented by the normalized histogram of visual words, which means that all SIFT features of an image are assigned to visual words and the number of occurrences of every word is counted. Therefor we have to get the SIFT features for every image from the training set again, but this time it gets sampled more densely than before. We used a step size of 2. Then we determine the nearest clusters of the sampled SIFT-features and count the number of occurrences. This histogram represents the bag of words for this image.\\
-The last step is to classify all the images of the test set to investigate the classification power of the bag of visual words model for our classification task. This is obviously quite similar to the previous step. (Get SIFT features densely sampled (step size is 2) and count number of nearest clusters to this features as bag of words) But this time the visual word histogram of an image is used for actual classifying it by means with the nearest neighbor method (we used a k of 3) with the previously learned training features and class labels. The result is stored in a confusion matrix. (See Figure~\ref{fig:conf_matrix_test})
+To extract these SIFT features from the images in the training set to collect them for k-means clustering, 100 SIFT features get extracted from every image. These features get added to the feature space which is $128 \times \mbox{size of training set}*\mbox{number of features per image}$. In our example the training set contains 800 images and the number of features per image is 100, that means the feature space is $128 \times 80000$ big. After that the 50 clusters get determined and stored in a matrix.\\
+The next step is to build a feature representation for every image in the training set that can be used for the classification of new images later on. An image is represented by the normalized histogram of visual words, which means that all SIFT features of an image are assigned to visual words and the number of occurrences of every word is counted. Therefore we have to get the SIFT features for every image from the training set again, but this time it gets sampled more densely than before. We used a step size of 2. Then we determine the nearest clusters of the sampled SIFT-features and count the number of occurrences. This histogram represents the bag of words for this image.\\
+The last step is to classify all the images of the test set to investigate the classification power of the bag of visual words model for our classification task. This is obviously quite similar to the previous step (Get SIFT features densely sampled (step size is 2) and count number of nearest clusters to these features as bag of words). But this time the visual word histogram of an image is used for actual classifying it by means with the nearest neighbor method (we used a k of 3) with the previously learned training features and class labels. The result is stored in a confusion matrix. (See Figure~\ref{fig:conf_matrix_test})
 
 \subsection{Results}
 \label{sec:results}
@@ -406,7 +406,7 @@ Figure~\ref{fig:easyimages} shows that in contrast it is very easy to distinguis
 
 \paragraph{Own Test Images}
 \label{sec:owntestimages}
-Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 different categories and tried to categorized them with our scene recognizer. Figure~\ref{fig:conf_matrix_own} shows the results of the scene recognition. As you can see only the picture of the bedroom and of the forest could get recognized correctly, the other 3 images were recognized wrong as bedroom.\\ This is also consistent with the above findings.
+Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 different categories and tried to categorized them with our scene recognizer. Figure~\ref{fig:conf_matrix_own} shows the results of the scene recognition. As you can see only the picture of the bedroom and of the forest were recognized correctly, the other 3 images were recognized wrong, as bedroom.\\ This is also consistent with the above findings.
 
 \paragraph{Parameters}
 
@@ -453,7 +453,7 @@ Figure~\ref{fig:ownimages} shows our own test images. We took 5 images from 5 di
 \begin{figure}
 		\centering
 		\includegraphics[width=\textwidth]{img/conf_matrix_own.pdf}
-		\caption{Classification results in percentage of the own pictures in form of a confusion matrix}
+		\caption{Classification results in percentage of the self-made pictures in form of a confusion matrix}
 		\label{fig:conf_matrix_own}
 \end{figure}
 \begin{figure}
